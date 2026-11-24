@@ -1,4 +1,4 @@
 {
-  "$comment": "Per-repository Leapfrog settings. See docs/adoption.md.",
+  "$comment": "Per-repository Verdigrade settings. See docs/adoption.md.",
   "extraRulePacks": ["acme-samples"]
 }

@@ -1,4 +1,4 @@
-# CI for Leapfrog itself.
+# CI for Verdigrade itself (move to .github/workflows/ci.yml to enable).
 name: ci
 
 on:
