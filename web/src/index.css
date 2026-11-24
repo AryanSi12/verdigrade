@@ -1,0 +1,1385 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------ */
+/* Design tokens                                                       */
+/* ------------------------------------------------------------------ */
+@theme {
+  /* Type: Inter (variable) for all UI text; JetBrains Mono only for code, paths and logs. No serif. */
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-sans);
+  --font-display: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Type scale (size / line-height). Base UI text is 14px. */
+  --text-2xs: 0.75rem;
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.25rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.375rem;
+  --text-base: 0.875rem;
+  --text-base--line-height: 1.3125rem;
+  --text-md: 1rem;
+  --text-md--line-height: 1.625rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 1.75rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl: 2.125rem;
+  --text-4xl--line-height: 2.5rem;
+  --text-5xl: 3.75rem;
+  --text-5xl--line-height: 1;
+  --text-6xl: 4.75rem;
+  --text-6xl--line-height: 0.98;
+  --text-7xl: 6rem;
+  --text-7xl--line-height: 0.94;
+
+  /* Spacing: Tailwind's 4px scale (--spacing) is the single spacing unit. */
+  --spacing: 0.25rem;
+
+  /* Radius scale */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.625rem;
+  --radius-2xl: 0.75rem;
+  --radius-3xl: 0.75rem;
+
+  /* Colors map to theme-aware CSS variables below. */
+  --color-bg: var(--lf-bg);
+  --color-surface: var(--lf-surface);
+  --color-surface-2: var(--lf-surface-2);
+  --color-surface-3: var(--lf-surface-3);
+  --color-elevated: var(--lf-elevated);
+  --color-border: var(--lf-border);
+  --color-border-strong: var(--lf-border-strong);
+  --color-fg: var(--lf-fg);
+  --color-fg-muted: var(--lf-fg-muted);
+  --color-fg-subtle: var(--lf-fg-subtle);
+  --color-primary: var(--lf-primary);
+  --color-primary-hover: var(--lf-primary-hover);
+  --color-primary-fg: var(--lf-primary-fg);
+  --color-accent: var(--lf-accent);
+  --color-accent-hover: var(--lf-accent-hover);
+  --color-accent-fg: var(--lf-accent-fg);
+  --color-accent-soft: var(--lf-accent-soft);
+  --color-accent-2: var(--lf-accent-2);
+  --color-accent-2-soft: var(--lf-accent-2-soft);
+  --color-success: var(--lf-success);
+  --color-success-soft: var(--lf-success-soft);
+  --color-warning: var(--lf-warning);
+  --color-warning-soft: var(--lf-warning-soft);
+  --color-danger: var(--lf-danger);
+  --color-danger-soft: var(--lf-danger-soft);
+  --color-info: var(--lf-info);
+  --color-info-soft: var(--lf-info-soft);
+  --color-code: var(--lf-code);
+  --color-code-fg: var(--lf-code-fg);
+  --color-code-gutter: var(--lf-code-gutter);
+
+  /* Elevation */
+  --shadow-xs: var(--lf-shadow-xs);
+  --shadow-card: var(--lf-shadow-card);
+  --shadow-pop: var(--lf-shadow-pop);
+  --shadow-glow: var(--lf-shadow-glow);
+}
+
+/* Palette (round 15): Radix Colors "Sand" neutrals + "Teal" accent, with Radix Amber as the warm
+   complement for glows. Status uses separate Radix scales (Grass pass, Tomato fail, Amber warn) so it
+   never reads as the accent. Source: https://www.radix-ui.com/colors (APCA-tuned 12-step scales).
+   Light text pairs meet WCAG AA (accent darkened from teal 11 to #0B7566 for 4.5:1+ on sand 2). */
+:root {
+  color-scheme: light;
+  --lf-bg: #f9f9f8;            /* sand 2 */
+  --lf-surface: #ffffff;
+  --lf-surface-2: #f1f0ef;     /* sand 3 */
+  --lf-surface-3: #e9e8e6;     /* sand 4 */
+  --lf-elevated: #ffffff;
+  --lf-border: #e2e1de;        /* sand 5 */
+  --lf-border-strong: #cfceca; /* sand 7 */
+  --lf-fg: #21201c;            /* sand 12 */
+  --lf-fg-muted: #63635e;      /* sand 11 */
+  --lf-fg-subtle: #6f6e68;
+  --lf-primary: #0b7566;
+  --lf-primary-hover: #095f53;
+  --lf-primary-fg: #ffffff;
+  --lf-accent: #0b7566;        /* teal, deepened from teal 11 #008573 */
+  --lf-accent-hover: #095f53;
+  --lf-accent-fg: #ffffff;
+  --lf-accent-soft: rgb(18 165 148 / 0.1);
+  --lf-accent-2: #ab6400;      /* amber 11 */
+  --lf-accent-2-soft: rgb(255 197 61 / 0.18);
+  --lf-success: #2a7e3b;       /* grass 11 */
+  --lf-success-soft: rgb(70 167 88 / 0.12);
+  --lf-warning: #ab6400;       /* amber 11 */
+  --lf-warning-soft: rgb(255 197 61 / 0.2);
+  --lf-danger: #d13415;        /* tomato 11 */
+  --lf-danger-soft: rgb(229 77 46 / 0.1);
+  --lf-info: #0b7566;
+  --lf-info-soft: rgb(18 165 148 / 0.1);
+  --lf-glow-a: rgb(18 165 148 / 0.16);
+  --lf-glow-b: rgb(255 197 61 / 0.16);
+  --lf-code: #fdfdfc;
+  --lf-code-fg: #21201c;
+  --lf-code-gutter: #6f6e68;
+  --lf-shadow-xs: 0 1px 2px rgb(33 32 28 / 0.05);
+  --lf-shadow-card: 0 0 0 1px rgb(33 32 28 / 0.02), 0 1px 2px rgb(33 32 28 / 0.05);
+  --lf-shadow-hover: 0 10px 28px -14px rgb(33 32 28 / 0.22), 0 0 0 1px rgb(33 32 28 / 0.03);
+  --lf-shadow-pop: 0 16px 36px -14px rgb(33 32 28 / 0.22), 0 0 0 1px rgb(33 32 28 / 0.06);
+  --lf-shadow-glow: none;
+  --lf-dot: transparent;
+  --lf-glow-1: transparent;
+  --lf-glow-2: transparent;
+  --lf-glow-3: transparent;
+  --lf-spot: transparent;
+  --lf-grain-opacity: 0;
+  --lf-gradient: linear-gradient(var(--lf-accent), var(--lf-accent));
+  --lf-display: linear-gradient(var(--lf-fg), var(--lf-fg));
+  --lf-header: #ffffff;
+  --lf-beam-1: #0b7566;
+  --lf-beam-2: #0b7566;
+  --lf-side-bg: #fdfdfc;       /* sand 1 */
+  --lf-side-fg: #21201c;
+  --lf-side-muted: #63635e;
+  --lf-side-border: #e2e1de;
+  --lf-side-hover: rgb(33 32 28 / 0.04);
+  --lf-side-active: rgb(18 165 148 / 0.1);
+  --lf-side-marker: #0b7566;
+}
+
+.dark {
+  color-scheme: dark;
+  /* Radix Colors Sage (dark) neutrals + Teal/Mint accent, Amber/Grass/Tomato status. */
+  --lf-bg: #101211;            /* sage dark 1 */
+  --lf-surface: #171918;       /* sage dark 2: cards */
+  --lf-surface-2: #1d201f;     /* between sage 2 and 3: insets, table heads */
+  --lf-surface-3: #272a29;     /* sage dark 4 */
+  --lf-elevated: #202221;      /* sage dark 3: menus, dialogs, toasts */
+  --lf-border: #2e3130;        /* sage dark 5 */
+  --lf-border-strong: #444947; /* sage dark 7 */
+  --lf-fg: #eceeed;            /* sage dark 12 */
+  --lf-fg-muted: #adb5b2;      /* sage dark 11 */
+  --lf-fg-subtle: #939d99;     /* between sage 10 and 11, AA on every surface */
+  --lf-primary: #58d5ba;       /* mint dark 11, same as accent */
+  --lf-primary-hover: #86ead4; /* mint dark 9 */
+  --lf-primary-fg: #0d1514;
+  --lf-accent: #58d5ba;        /* mint dark 11: softer than neon teal */
+  --lf-accent-hover: #c4f5e1;  /* mint dark 12 */
+  --lf-accent-fg: #0d1514;
+  --lf-accent-soft: rgb(88 213 186 / 0.12);
+  --lf-accent-2: #e2b54a;      /* amber dark 11, toned down */
+  --lf-accent-2-soft: rgb(226 181 74 / 0.12);
+  --lf-success: #71d083;       /* grass dark 11 */
+  --lf-success-soft: rgb(70 167 88 / 0.14);
+  --lf-warning: #e2b54a;
+  --lf-warning-soft: rgb(226 181 74 / 0.12);
+  --lf-danger: #ff977d;        /* tomato dark 11 */
+  --lf-danger-soft: rgb(229 77 46 / 0.14);
+  --lf-info: #58d5ba;
+  --lf-info-soft: rgb(88 213 186 / 0.12);
+  --lf-glow-a: rgb(88 213 186 / 0.11);
+  --lf-glow-b: rgb(226 181 74 / 0.06);
+  --lf-code: #0c0e0d;
+  --lf-code-fg: #e2e6e4;
+  --lf-code-gutter: #939d99;
+  --lf-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
+  --lf-shadow-card: inset 0 1px 0 rgb(255 255 255 / 0.035), 0 0 0 1px rgb(0 0 0 / 0.25), 0 1px 3px rgb(0 0 0 / 0.45);
+  --lf-shadow-hover: inset 0 1px 0 rgb(255 255 255 / 0.05), 0 16px 34px -16px rgb(0 0 0 / 0.85), 0 0 0 1px rgb(88 213 186 / 0.14);
+  --lf-shadow-pop: inset 0 1px 0 rgb(255 255 255 / 0.05), 0 24px 48px -12px rgb(0 0 0 / 0.75), 0 0 0 1px rgb(0 0 0 / 0.4);
+  --lf-shadow-glow: none;
+  --lf-dot: transparent;
+  --lf-glow-1: transparent;
+  --lf-glow-2: transparent;
+  --lf-glow-3: transparent;
+  --lf-spot: transparent;
+  --lf-grain-opacity: 0;
+  --lf-gradient: linear-gradient(var(--lf-accent), var(--lf-accent));
+  --lf-display: linear-gradient(var(--lf-fg), var(--lf-fg));
+  --lf-header: #171918;
+  --lf-beam-1: #58d5ba;
+  --lf-beam-2: #58d5ba;
+  --lf-side-bg: #0c0e0d;
+  --lf-side-fg: #eceeed;
+  --lf-side-muted: #adb5b2;
+  --lf-side-border: #202221;
+  --lf-side-hover: rgb(255 255 255 / 0.04);
+  --lf-side-active: rgb(88 213 186 / 0.1);
+  --lf-side-marker: #58d5ba;
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+html {
+  background: var(--lf-bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+/* Decorative glows bleed past the container; clip them without creating a scroll container (sticky still works). */
+#main {
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  background: var(--lf-bg);
+  color: var(--lf-fg);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--font-mono);
+  font-feature-settings: normal;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--lf-accent) 30%, transparent);
+}
+
+/* Visible keyboard focus everywhere; mouse clicks stay clean. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--lf-accent);
+  outline-offset: 2px;
+}
+
+/* Page backdrop: a dotted grid fading out under a radial mask, three slow mesh glows (transform-only drift),
+   and a fine grain layer. All decorative, fixed, pointer-events: none. */
+.app-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.app-backdrop::before {
+  content: "";
+  position: absolute;
+  inset: -25% -15% auto -15%;
+  height: 85vh;
+  background:
+    radial-gradient(38% 46% at 22% 32%, var(--lf-glow-1), transparent 70%),
+    radial-gradient(32% 40% at 78% 18%, var(--lf-glow-2), transparent 70%),
+    radial-gradient(26% 34% at 55% 62%, var(--lf-glow-3), transparent 70%);
+  filter: blur(8px);
+  animation: backdrop-drift 28s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.app-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(var(--lf-dot) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 75% 55% at 50% 0%, #000 25%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 55% at 50% 0%, #000 25%, transparent 78%);
+}
+
+@keyframes backdrop-drift {
+  from {
+    transform: translate3d(-3%, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(3%, 2%, 0) scale(1.06);
+  }
+}
+
+/* Film grain (Raycast/Resend). A tiny tiled SVG turbulence; costs one texture. */
+.grain {
+  position: relative;
+  isolation: isolate;
+}
+
+.grain::after,
+.grain-layer {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--lf-grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  z-index: 1;
+}
+
+/* Dotted grid patch with a radial mask, for hero and art panels. */
+.dot-grid {
+  background-image: radial-gradient(var(--lf-dot) 1px, transparent 1.2px);
+  background-size: 18px 18px;
+  mask-image: radial-gradient(ellipse 70% 70% at 60% 45%, #000 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 60% 45%, #000 30%, transparent 75%);
+}
+
+/* Mesh glow blobs (positioned by the caller). */
+.mesh {
+  background:
+    radial-gradient(40% 50% at 30% 35%, var(--lf-glow-1), transparent 70%),
+    radial-gradient(35% 45% at 75% 30%, var(--lf-glow-2), transparent 70%),
+    radial-gradient(30% 40% at 60% 80%, var(--lf-glow-3), transparent 70%);
+  filter: blur(6px);
+}
+
+/* Cursor spotlight: App sets --mx/--my on the hovered .spotlight element (CSS vars, no re-render). */
+.spotlight {
+  position: relative;
+}
+
+.spotlight::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%), var(--lf-spot), transparent 45%);
+}
+
+.spotlight:hover::after {
+  opacity: 1;
+}
+
+/* Display headings: vertical ink fade (Vercel-style) */
+.text-display {
+  background: var(--lf-display);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Elevated glass surface for floating panels */
+.surface-glass {
+  background: color-mix(in oklab, var(--lf-elevated) 72%, transparent);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+
+/* Light beams travelling along SVG rails: a short dash moving over a long gap. */
+.beam {
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 36 520;
+  stroke-dashoffset: 556;
+  animation: beam-travel 3.2s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+
+.beam-glow {
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+@keyframes beam-travel {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -5px, 0);
+  }
+}
+
+.float-slow {
+  animation: float-y 6s ease-in-out infinite;
+}
+
+@keyframes ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-slow {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: ring-spin 18s linear infinite;
+}
+
+@keyframes fade-cell {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.blink-cell {
+  animation: fade-cell 2.4s ease-in-out infinite;
+}
+
+.glass-header {
+  background: var(--lf-header);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+}
+
+.text-gradient {
+  background: var(--lf-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-gradient-accent {
+  background: var(--lf-gradient);
+}
+
+/* 1px gradient ring for highlighted cards */
+.ring-gradient {
+  position: relative;
+}
+
+.ring-gradient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--lf-gradient);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -3rem;
+  z-index: 60;
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--radius-md);
+  background: var(--lf-accent);
+  color: var(--lf-accent-fg);
+  font-weight: 500;
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+/* Running-step indicator: opacity only */
+@keyframes soft-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.pulse-soft {
+  animation: soft-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--lf-surface-2) 0%, var(--lf-surface-3) 50%, var(--lf-surface-2) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.toast-in {
+  animation: toast-in 180ms ease-out;
+}
+
+/* Native select with our own chevron, so every control has the same height and font. */
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23858aa0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.625rem center;
+  padding-right: 2rem;
+}
+
+/* Rendered Markdown report */
+.markdown {
+  overflow-wrap: anywhere;
+  color: var(--lf-fg-muted);
+  font-size: var(--text-base);
+  line-height: 1.7;
+}
+
+.markdown h1 {
+  color: var(--lf-fg);
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl--line-height);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 1rem;
+}
+
+.markdown h2 {
+  color: var(--lf-fg);
+  font-size: var(--text-lg);
+  line-height: var(--text-lg--line-height);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 1.75rem 0 0.625rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--lf-border);
+}
+
+.markdown h3 {
+  color: var(--lf-fg);
+  font-weight: 600;
+  margin: 1rem 0 0.25rem;
+}
+
+.markdown p {
+  margin: 0.5rem 0;
+}
+
+.markdown ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.5rem 0;
+}
+
+.markdown li {
+  position: relative;
+  padding-left: 1rem;
+  margin: 0.25rem 0;
+}
+
+.markdown li::before {
+  content: "";
+  position: absolute;
+  left: 0.125rem;
+  top: 0.7em;
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 9999px;
+  background: var(--lf-border-strong);
+}
+
+.markdown ul ul {
+  margin: 0.25rem 0 0.25rem 0.25rem;
+}
+
+.markdown strong {
+  color: var(--lf-fg);
+  font-weight: 600;
+}
+
+.markdown code {
+  font-size: 0.85em;
+  color: var(--lf-fg);
+  background: var(--lf-surface-2);
+  border: 1px solid var(--lf-border);
+  border-radius: var(--radius-xs);
+  padding: 0.05rem 0.3rem;
+}
+
+.markdown pre {
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  background: var(--lf-code);
+  color: var(--lf-code-fg);
+  border: 1px solid var(--lf-border);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beam {
+    animation: none;
+    stroke-dasharray: none;
+    opacity: 0.55;
+  }
+  .app-backdrop::before,
+  .float-slow,
+  .spin-slow,
+  .blink-cell {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Run rail: a light pulse sliding along the connector into the running step. */
+@keyframes rail-pulse {
+  from {
+    transform: translate3d(-100%, 0, 0);
+  }
+  to {
+    transform: translate3d(200%, 0, 0);
+  }
+}
+
+.rail-pulse {
+  animation: rail-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-pulse {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Round 3: editorial type, richer surfaces, reveal + marquee motion    */
+/* (patterns from Awwwards SOTD dev sites and Dribbble dev-tool shots;  */
+/*  see ui-shots/reference-notes3.md)                                   */
+/* ------------------------------------------------------------------ */
+
+/* Display headings: big, tight, balanced. Sizes use clamp so 390px phones still get drama. */
+.display-xl {
+  font-size: clamp(2.75rem, 1.2rem + 6.2vw, 6.25rem);
+  line-height: 0.95;
+  letter-spacing: -0.048em;
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+.display-lg {
+  font-size: clamp(2.25rem, 1.4rem + 3.4vw, 4.25rem);
+  line-height: 1;
+  letter-spacing: -0.042em;
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+.display-md {
+  font-size: clamp(1.875rem, 1.3rem + 2.2vw, 3rem);
+  line-height: 1.04;
+  letter-spacing: -0.036em;
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+/* Editorial accent: an italic serif word inside a grotesk heading (a 2025-26 Awwwards staple). */
+.serif-accent {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  padding-right: 0.08em;
+  margin-right: -0.04em;
+}
+
+/* Mono eyebrow / index labels: "01 / Recent runs" */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  line-height: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lf-fg-subtle);
+}
+
+.lede {
+  font-size: clamp(1rem, 0.9rem + 0.35vw, 1.1875rem);
+  line-height: 1.6;
+  color: var(--lf-fg-muted);
+  text-wrap: pretty;
+}
+
+/* Rich card: a lit top edge, a faint vertical wash and a hairline ring (Linear / Raycast cards). */
+.card-rich {
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--lf-surface-2) 70%, transparent) 0%, transparent 42%),
+    var(--lf-surface);
+}
+
+.dark .card-rich {
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.06),
+    0 0 0 1px oklch(0 0 0 / 0.35),
+    0 18px 40px -22px oklch(0 0 0 / 0.9);
+}
+
+.lift {
+  transition:
+    transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 160ms ease,
+    box-shadow 260ms ease;
+}
+
+.lift:hover {
+  transform: translate3d(0, -3px, 0);
+}
+
+/* Reveal on scroll. Only hidden once JS has armed it (html.reveal-on), so no-JS and print stay visible. */
+html.reveal-on .reveal {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 700ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+html.reveal-on .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Marquee ribbon of recipe names, masked at both edges. */
+.marquee {
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 48s linear infinite;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* Tick field (hero artwork): a scan band sweeps across the ticks. */
+.tick-scan {
+  animation: tick-scan 7s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+
+@keyframes tick-scan {
+  0% {
+    transform: translate3d(-30%, 0, 0);
+  }
+  100% {
+    transform: translate3d(130%, 0, 0);
+  }
+}
+
+/* Giant outlined wordmark in the footer (SVG text stretched to the container width). */
+.wordmark text {
+  font-family: var(--font-sans);
+  font-size: 212px;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  fill: none;
+  stroke: var(--lf-border-strong);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  user-select: none;
+}
+
+/* Index rows (pipeline list): hover sweeps an accent wash in from the left. */
+.index-row {
+  position: relative;
+  isolation: isolate;
+}
+
+.index-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, var(--lf-accent-soft), transparent 70%);
+  opacity: 0;
+  transform: scaleX(0.6);
+  transform-origin: left;
+  transition:
+    opacity 300ms ease,
+    transform 400ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.index-row:hover::before {
+  opacity: 1;
+  transform: none;
+}
+
+/* Floating capsule header (Raycast / Made With GSAP pill nav). */
+.nav-capsule {
+  background: var(--lf-header);
+  backdrop-filter: saturate(160%) blur(16px);
+  -webkit-backdrop-filter: saturate(160%) blur(16px);
+  box-shadow: var(--lf-shadow-card);
+}
+
+/* Window chrome around artwork, like a product shot on Dribbble. */
+.window {
+  background: color-mix(in oklab, var(--lf-surface) 82%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.reveal-on .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .marquee-track,
+  .tick-scan {
+    animation: none;
+  }
+  .lift:hover {
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Round 4: plan mode, language adapters and the journey stepper       */
+/* ------------------------------------------------------------------ */
+
+/* file:line and path chips used across the plan, run and report views. */
+.code-chip {
+  display: inline-flex;
+  max-width: 100%;
+  min-width: 0;
+  height: 1.375rem;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--lf-border);
+  background: var(--lf-surface-2);
+  padding: 0 0.45rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  line-height: 1;
+  color: var(--lf-fg-muted);
+  white-space: nowrap;
+}
+
+/* The sticky approval bar sits over content, so it is nearly opaque for steady contrast. */
+.approval-bar {
+  background: color-mix(in oklab, var(--lf-elevated) 94%, transparent);
+  backdrop-filter: saturate(160%) blur(16px);
+  -webkit-backdrop-filter: saturate(160%) blur(16px);
+}
+
+/* Language picker cards: a tinted top edge when selected. */
+.lang-card[aria-checked="true"] {
+  border-color: color-mix(in oklab, var(--lf-accent) 55%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--lf-accent) 40%, transparent), var(--lf-shadow-card);
+}
+.lang-card[aria-checked="true"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: var(--lf-gradient);
+  border-radius: inherit;
+}
+
+/* ------------------------------------------------------------------ */
+/* Round 5: professional redesign. Flat surfaces, one accent, calm type. */
+/* Decorative layers from earlier rounds are switched off here.         */
+/* ------------------------------------------------------------------ */
+.app-backdrop,
+.dot-grid,
+.mesh,
+.grain::after,
+.grain-layer,
+.ring-gradient::before,
+.spotlight::after,
+.index-row::before {
+  display: none;
+}
+
+.text-display,
+.text-gradient {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: inherit;
+}
+
+.serif-accent {
+  font-family: inherit;
+  font-style: normal;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  padding: 0;
+  margin: 0;
+}
+
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--lf-fg-subtle);
+}
+
+.display-xl {
+  font-size: clamp(2rem, 1.5rem + 2vw, 2.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+.display-lg {
+  font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+}
+.display-md {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+
+.card-rich,
+.dark .card-rich {
+  background: var(--lf-surface);
+  box-shadow: var(--lf-shadow-card);
+}
+
+.lift:hover {
+  transform: none;
+}
+
+.nav-capsule,
+.glass-header,
+.surface-glass,
+.window,
+.approval-bar {
+  background: var(--lf-header);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.bg-gradient-accent {
+  background: var(--lf-accent);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Data tables used by the plan and run summaries. */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+.data-table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--lf-fg-subtle);
+  background: var(--lf-surface-2);
+  padding: 0.5rem 0.875rem;
+  border-bottom: 1px solid var(--lf-border);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 0.75rem 0.875rem;
+  border-bottom: 1px solid var(--lf-border);
+  color: var(--lf-fg);
+  vertical-align: middle;
+  font-variant-numeric: tabular-nums;
+}
+.data-table tr:last-child td {
+  border-bottom: 0;
+}
+.data-table tbody tr:nth-child(even) td {
+  background: color-mix(in oklab, var(--lf-surface-2) 55%, transparent);
+}
+.data-table tbody tr:hover td {
+  background: var(--lf-surface-2);
+}
+.data-table tr[data-highlight="true"] td {
+  background: var(--lf-accent-soft);
+}
+.data-table tr[data-highlight="true"] td:first-child {
+  box-shadow: inset 3px 0 0 var(--lf-accent);
+}
+
+/* The giant outlined footer wordmark is decoration; the redesign drops it. */
+.wordmark {
+  display: none;
+}
+
+/* Round 7: Inter, crisp and tabular. Base 14px / 1.5; weights 400 / 500 / 600 only. */
+body {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  font-weight: 400;
+  font-feature-settings: "cv11", "ss01", "calt";
+  letter-spacing: -0.003em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+h1,
+h2,
+h3 {
+  letter-spacing: -0.015em;
+}
+h1 {
+  letter-spacing: -0.02em;
+}
+.tabular-nums,
+.tabular,
+.kpi-value,
+.data-table td,
+time {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "cv11", "ss01", "tnum";
+}
+.font-bold,
+.font-extrabold,
+.font-black {
+  font-weight: 600;
+}
+.kpi-value {
+  font-size: 2rem;
+  line-height: 2.375rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.kpi-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--lf-fg-subtle);
+}
+.side-nav {
+  background: var(--lf-side-bg);
+  color: var(--lf-side-fg);
+  border-color: var(--lf-side-border);
+}
+.data-table tbody tr[data-highlight="true"] td {
+  background: var(--lf-accent-soft);
+}
+.data-table tbody tr[data-highlight="true"] td:first-child {
+  box-shadow: inset 3px 0 0 var(--lf-accent);
+}
+
+/* Round 8: sleek polish (Linear / Vercel feel). Manrope for headings and numbers, Inter for UI,
+   hairline borders, soft tiles, 44px table rows, dots instead of filled badges, 150ms transitions. */
+body {
+  font-size: 0.84375rem;
+  line-height: 1.5;
+  letter-spacing: -0.006em;
+}
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+code,
+kbd,
+pre,
+samp,
+.font-mono {
+  font-size: 0.78125rem;
+  letter-spacing: 0;
+}
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: 2.125rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  font-feature-settings: "tnum";
+}
+.kpi-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--lf-fg-subtle);
+}
+.data-table {
+  font-size: 0.84375rem;
+}
+.data-table th {
+  background: transparent;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  color: var(--lf-fg-subtle);
+  height: 2.25rem;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--lf-border);
+}
+.data-table td {
+  height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--lf-border);
+}
+.data-table tbody tr:nth-child(even) td {
+  background: transparent;
+}
+.data-table tbody tr td {
+  transition: background-color 150ms ease;
+}
+.data-table tbody tr:hover td {
+  background: color-mix(in oklab, var(--lf-surface-2) 70%, transparent);
+}
+.data-table tbody tr[data-highlight="true"] td {
+  background: color-mix(in oklab, var(--lf-accent) 4%, transparent);
+}
+.data-table tbody tr[data-highlight="true"] td:first-child {
+  box-shadow: inset 2px 0 0 var(--lf-accent);
+}
+/* Focus ring: a soft accent halo instead of a hard outline. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--lf-bg), 0 0 0 4px color-mix(in srgb, var(--lf-accent) 55%, transparent);
+}
+:where(a, button, summary) {
+  transition-duration: 150ms;
+}
+.side-nav ::-webkit-scrollbar {
+  width: 0;
+}
+.kpi-value-word {
+  font-size: 1.25rem;
+  letter-spacing: -0.015em;
+}
+/* Round 9: one calm system. Slate neutrals, small uppercase labels in Inter, no decoration. */
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--lf-fg-subtle);
+}
+.spotlight::after {
+  display: none;
+}
+.lift:hover {
+  transform: none;
+}
+.card-rich {
+  background: var(--lf-surface);
+}
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+/* ---- Round 10: refactor quiz transitions ---------------------------------------------- */
+@keyframes quiz-in {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes quiz-in-back {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: none; }
+}
+.quiz-in { animation: quiz-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.quiz-in-back { animation: quiz-in-back 260ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .quiz-in, .quiz-in-back { animation: none; }
+}
+
+/* ---- Round 14: light Overview (soft cobalt/sky glow, dot grid, hairlines, one accent) --- */
+.ov-hero {
+  border-radius: 20px;
+  border: 1px solid var(--lf-border);
+  background: var(--lf-surface);
+  box-shadow: var(--lf-shadow-card);
+}
+.ov-hero-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.ov-hero-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  inset: -20%;
+  background:
+    radial-gradient(34% 44% at 78% 26%, var(--lf-glow-a), transparent 70%),
+    radial-gradient(30% 40% at 60% 88%, var(--lf-glow-b), transparent 70%),
+    radial-gradient(26% 34% at 12% 8%, var(--lf-glow-a), transparent 70%);
+  animation: ov-drift 22s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes ov-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-3%, 2%, 0) scale(1.04); }
+  100% { transform: translate3d(2%, -2%, 0) scale(1.02); }
+}
+.ov-hero-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgb(33 32 28 / 0.09) 1px, transparent 1.2px);
+  background-size: 20px 20px;
+  mask-image: radial-gradient(ellipse 60% 70% at 80% 30%, #000 15%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 70% at 80% 30%, #000 15%, transparent 75%);
+}
+.dark .ov-hero-bg::after { background-image: radial-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1.2px); }
+.ov-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 1.2rem + 2.4vw, 3.25rem);
+  line-height: 1.06;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  color: var(--lf-fg);
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+.ov-eyebrow { font-size: 11.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--lf-accent); }
+.ov-btn-primary {
+  background: var(--lf-accent);
+  color: var(--lf-accent-fg);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.15) inset, 0 6px 16px -8px rgb(11 117 102 / 0.55);
+  transition: background-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+.ov-btn-primary:hover { background: var(--lf-accent-hover); transform: translateY(-1px); }
+.ov-btn-secondary {
+  background: var(--lf-surface);
+  color: var(--lf-fg);
+  border: 1px solid var(--lf-border-strong);
+  box-shadow: var(--lf-shadow-xs);
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.ov-btn-secondary:hover { background: var(--lf-surface-2); }
+.ov-btn-primary:focus-visible, .ov-btn-secondary:focus-visible, .ov-node:focus-visible { outline: 2px solid var(--lf-accent); outline-offset: 2px; }
+.ov-chip { background: color-mix(in oklab, var(--lf-surface) 85%, transparent); border: 1px solid var(--lf-border); }
+
+.ov-code {
+  border-radius: 14px;
+  background: var(--lf-surface);
+  border: 1px solid var(--lf-border);
+  box-shadow: 0 1px 2px rgb(14 16 18 / 0.04), 0 24px 48px -24px rgb(33 32 28 / 0.25);
+  overflow: hidden;
+}
+.dark .ov-code { box-shadow: 0 24px 48px -24px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.03); }
+.ov-line { color: var(--lf-fg-muted); animation: ov-line-in 380ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards; animation-delay: var(--pop-delay, 0ms); }
+.ov-line-del { background: var(--lf-danger-soft); color: var(--lf-danger); }
+.ov-line-del span:last-child { text-decoration: line-through; text-decoration-color: color-mix(in oklab, var(--lf-danger) 40%, transparent); }
+.ov-line-add { background: var(--lf-success-soft); color: var(--lf-success); font-weight: 500; }
+@keyframes ov-line-in { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+
+.ov-card {
+  border-radius: 16px;
+  background: var(--lf-surface);
+  border: 1px solid var(--lf-border);
+  box-shadow: var(--lf-shadow-card);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.ov-card:hover { border-color: var(--lf-border-strong); }
+.ov-track { background: var(--lf-surface-3); border-radius: 9999px; }
+.ov-track-fill { background: linear-gradient(90deg, var(--lf-accent), var(--lf-accent-2)); border-radius: 9999px; transition: width 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.ov-node { border: 1px solid var(--lf-border-strong); transition: background-color 0.3s, border-color 0.3s, color 0.3s, box-shadow 0.3s; cursor: pointer; }
+.ov-node-todo { background: var(--lf-surface); color: var(--lf-fg-subtle); }
+.ov-node-done { background: var(--lf-accent-soft); border-color: color-mix(in oklab, var(--lf-accent) 35%, transparent); color: var(--lf-accent); }
+.ov-node-active {
+  background: var(--lf-accent);
+  border-color: var(--lf-accent);
+  color: var(--lf-accent-fg);
+  box-shadow: 0 0 0 5px var(--lf-accent-soft);
+  animation: ov-step 360ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@keyframes ov-step { 0% { transform: scale(0.92); } 60% { transform: scale(1.07); } 100% { transform: none; } }
+.ov-bar { transform-origin: bottom; animation: ov-bar-in 420ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards; animation-delay: var(--pop-delay, 0ms); transition: filter 0.15s; }
+.ov-bar:hover { filter: brightness(1.12); }
+.ov-bar-pass { background: color-mix(in oklab, var(--lf-success) 75%, transparent); }
+.ov-bar-fail { background: color-mix(in oklab, var(--lf-danger) 75%, transparent); }
+.ov-bar-run { background: color-mix(in oklab, var(--lf-accent) 65%, transparent); }
+@keyframes ov-bar-in { from { transform: scaleY(0.05); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ov-pop { from { opacity: 0; transform: translateY(6px) scale(0.985); } to { opacity: 1; transform: none; } }
+.ov-pop { animation: ov-pop 460ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards; animation-delay: var(--pop-delay, 0ms); }
+@media (prefers-reduced-motion: reduce) {
+  .ov-pop, .ov-line, .ov-bar, .ov-node-active { animation: none; }
+  .ov-track-fill, .ov-node, .ov-card, .ov-btn-primary { transition: none; }
+  .ov-btn-primary:hover { transform: none; }
+}
+
+/* Scroll wrappers contain their absolutely positioned children (e.g. .sr-only labels in wide
+   table headers), so those can't escape and widen the page on narrow screens. */
+.overflow-x-auto { position: relative; }
+
+/* ---- Round 15: professional motion (subtle, 150–400ms ease-out, off under reduced motion) --- */
+@keyframes route-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.route-in { animation: route-in 280ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+/* Scroll reveal: the App's IntersectionObserver adds .is-visible; children stagger in. */
+html.reveal-on .reveal { transform: translate3d(0, 14px, 0); transition-duration: 520ms; }
+html.reveal-on .reveal .ov-bar { animation-play-state: paused; }
+html.reveal-on .reveal.is-visible .ov-bar { animation-play-state: running; }
+/* Cards and rows: gentle lift / tint on hover. */
+.ov-card { transition: border-color 0.2s, box-shadow 0.25s, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.ov-card:hover { transform: translateY(-2px); box-shadow: var(--lf-shadow-hover); }
+.data-table tbody tr td { transition: background-color 0.15s ease-out; }
+.data-table tbody tr:hover td:first-child { box-shadow: inset 2px 0 0 var(--lf-accent); }
+.ov-chip { transition: border-color 0.15s, transform 0.15s; }
+.ov-chip:hover { border-color: color-mix(in oklab, var(--lf-accent) 40%, var(--lf-border)); transform: translateY(-1px); }
+.ov-btn-primary:active, .ov-btn-secondary:active { transform: translateY(1px) scale(0.985); }
+/* Focus rings use the accent everywhere. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid var(--lf-accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .route-in, .ov-hero-bg::before { animation: none; }
+  html.reveal-on .reveal { transform: none; }
+  .ov-card:hover, .ov-chip:hover { transform: none; }
+  .ov-btn-primary:active, .ov-btn-secondary:active { transform: none; }
+}
+.dark .ov-line-del { background: rgb(229 77 46 / 0.1); }
+.dark .ov-line-add { background: rgb(70 167 88 / 0.12); }

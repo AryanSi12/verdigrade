@@ -1,0 +1,142 @@
+{
+  "$comment": "Java / Spring Boot matrix: the single source of truth for OpenRewrite pins, supported targets and routes. Validated with zod at startup (bot/lib/matrix.ts, shared envelope in bot/lib/matrixBase.ts). Run `npx leapfrog validate` after editing.",
+  "ecosystem": "java",
+  "schemaVersion": 2,
+  "plugin": "org.openrewrite.maven:rewrite-maven-plugin:6.46.1",
+  "gradlePlugin": "org.openrewrite:plugin:7.41.0",
+  "artifacts": {
+    "rewrite-migrate-java": "org.openrewrite.recipe:rewrite-migrate-java:3.42.1",
+    "rewrite-spring": "org.openrewrite.recipe:rewrite-spring:6.37.1"
+  },
+  "defaults": {
+    "targetJava": "21",
+    "targetBoot": "4.0.x"
+  },
+  "supportedJavaTargets": [
+    "17",
+    "21"
+  ],
+  "supportedBootTargets": [
+    {
+      "id": "none",
+      "label": "No Boot change",
+      "parentHint": ""
+    },
+    {
+      "id": "3.5.x",
+      "label": "Spring Boot 3.5.x",
+      "parentHint": "3.5.16"
+    },
+    {
+      "id": "4.0.x",
+      "label": "Spring Boot 4.0.x",
+      "parentHint": "4.0.9"
+    }
+  ],
+  "bootTargetAliases": {
+    "3": "3.5.x",
+    "3.x": "3.5.x",
+    "3.3.x": "3.5.x",
+    "3.4.x": "3.5.x",
+    "4": "4.0.x",
+    "4.x": "4.0.x"
+  },
+  "routes": [
+    {
+      "id": "to-java21-boot4",
+      "description": "Java 8/11/17 → 21 and Spring Boot 2.x/3.x → 4.0 (default accelerator path)",
+      "targetJava": "21",
+      "targetBoot": "4.0.x",
+      "fromJava": [
+        "8",
+        "11",
+        "17",
+        "21"
+      ],
+      "fromBoot": [
+        "2.x",
+        "3.x",
+        "4.x",
+        "none"
+      ],
+      "modernizerRules": "boot4",
+      "recipes": [
+        {
+          "when": "javaBelowTarget",
+          "artifact": "rewrite-migrate-java",
+          "recipe": "org.openrewrite.java.migrate.UpgradeToJava21"
+        },
+        {
+          "when": "bootPresent",
+          "artifact": "rewrite-spring",
+          "recipe": "org.openrewrite.java.spring.boot4.UpgradeSpringBoot_4_0"
+        },
+        {
+          "when": "javaxFiles",
+          "artifact": "rewrite-migrate-java",
+          "recipe": "org.openrewrite.java.migrate.jakarta.JavaxMigrationToJakarta"
+        }
+      ]
+    },
+    {
+      "id": "to-java17-boot-none",
+      "description": "Java 8/11 → 17 only (no Spring Boot parent rewrite)",
+      "targetJava": "17",
+      "targetBoot": "none",
+      "fromJava": [
+        "8",
+        "11",
+        "17"
+      ],
+      "fromBoot": [
+        "2.x",
+        "3.x",
+        "4.x",
+        "none"
+      ],
+      "modernizerRules": "none",
+      "recipes": [
+        {
+          "when": "javaBelowTarget",
+          "artifact": "rewrite-migrate-java",
+          "recipe": "org.openrewrite.java.migrate.UpgradeToJava17"
+        }
+      ]
+    },
+    {
+      "id": "to-java21-boot3",
+      "description": "Java 8/11/17 → 21 and Spring Boot 2.x/3.x → 3.5 (last OSS-supported 3.x line)",
+      "targetJava": "21",
+      "targetBoot": "3.5.x",
+      "fromJava": [
+        "8",
+        "11",
+        "17",
+        "21"
+      ],
+      "fromBoot": [
+        "2.x",
+        "3.x",
+        "none"
+      ],
+      "modernizerRules": "boot3",
+      "recipes": [
+        {
+          "when": "javaBelowTarget",
+          "artifact": "rewrite-migrate-java",
+          "recipe": "org.openrewrite.java.migrate.UpgradeToJava21"
+        },
+        {
+          "when": "bootPresent",
+          "artifact": "rewrite-spring",
+          "recipe": "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5"
+        },
+        {
+          "when": "javaxFiles",
+          "artifact": "rewrite-migrate-java",
+          "recipe": "org.openrewrite.java.migrate.jakarta.JavaxMigrationToJakarta"
+        }
+      ]
+    }
+  ]
+}

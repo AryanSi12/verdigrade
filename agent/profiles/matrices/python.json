@@ -1,0 +1,98 @@
+{
+  "$comment": "Python matrix: supported interpreter targets, routes, pinned package versions and pinned rewrite tools. Validated with zod at startup (bot/lib/adapters/pythonMatrix.ts, shared envelope in bot/lib/matrixBase.ts). Run `npx leapfrog validate` after editing. Versions checked against PyPI, python.org (Python 3.15.2 / 3.14.10 / 3.13.18, 2026-10-25) and the Django Python-support table on 2026-11-13.",
+  "ecosystem": "python",
+  "schemaVersion": 1,
+  "tools": {
+    "pyupgrade": "pyupgrade==3.22.0",
+    "djangoUpgrade": "django-upgrade==1.33.0"
+  },
+  "defaults": { "python": "3.14" },
+  "supportedPythonTargets": [
+    { "id": "3.13", "label": "Python 3.13 (security fixes until 2029-10)", "latest": "3.13.18" },
+    { "id": "3.14", "label": "Python 3.14 (bugfix, supported until 2030-10)", "latest": "3.14.10" },
+    { "id": "3.15", "label": "Python 3.15 (newest stable, supported until 2031-10)", "latest": "3.15.2" }
+  ],
+  "routes": [
+    {
+      "id": "to-py314",
+      "description": "Python 3.8–3.13 → Python 3.14 (default), Django → 5.2 LTS, Flask 2 → 3.1, pytest → 9",
+      "python": "3.14",
+      "fromPython": ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"],
+      "requiresPython": ">=3.14",
+      "frameworks": { "django": "5.2", "flask": "3.1" },
+      "codemods": ["pyupgrade", "django-upgrade"],
+      "packages": [
+        { "name": "Django", "version": "5.2.19", "minimum": "5.2" },
+        { "name": "asgiref", "version": "3.13.0", "minimum": "3.8.1" },
+        { "name": "sqlparse", "version": "0.6.1", "minimum": "0.3.1" },
+        { "name": "pytest-django", "version": "4.14.0", "minimum": "4.9" },
+        { "name": "Flask", "version": "3.1.3", "minimum": "3.1" },
+        { "name": "Werkzeug", "version": "3.1.9", "minimum": "3.1" },
+        { "name": "Jinja2", "version": "3.1.6", "minimum": "3.1.2" },
+        { "name": "itsdangerous", "version": "2.2.0", "minimum": "2.2" },
+        { "name": "click", "version": "8.5.1", "minimum": "8.1.3" },
+        { "name": "MarkupSafe", "version": "3.0.4", "minimum": "2.1.1" },
+        { "name": "blinker", "version": "1.9.0", "minimum": "1.9" },
+        { "name": "pytest", "version": "9.2.0", "minimum": "8.4" }
+      ]
+    },
+    {
+      "id": "to-py313",
+      "description": "Python 3.8–3.12 → Python 3.13 (smaller step), Django → 5.2 LTS, Flask 2 → 3.1, pytest → 9",
+      "python": "3.13",
+      "fromPython": ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"],
+      "requiresPython": ">=3.13",
+      "frameworks": { "django": "5.2", "flask": "3.1" },
+      "codemods": ["pyupgrade", "django-upgrade"],
+      "packages": [
+        { "name": "Django", "version": "5.2.19", "minimum": "5.2" },
+        { "name": "asgiref", "version": "3.13.0", "minimum": "3.8.1" },
+        { "name": "sqlparse", "version": "0.6.1", "minimum": "0.3.1" },
+        { "name": "pytest-django", "version": "4.14.0", "minimum": "4.9" },
+        { "name": "Flask", "version": "3.1.3", "minimum": "3.1" },
+        { "name": "Werkzeug", "version": "3.1.9", "minimum": "3.1" },
+        { "name": "Jinja2", "version": "3.1.6", "minimum": "3.1.2" },
+        { "name": "itsdangerous", "version": "2.2.0", "minimum": "2.2" },
+        { "name": "click", "version": "8.5.1", "minimum": "8.1.3" },
+        { "name": "MarkupSafe", "version": "3.0.4", "minimum": "2.1.1" },
+        { "name": "blinker", "version": "1.9.0", "minimum": "1.9" },
+        { "name": "pytest", "version": "9.2.0", "minimum": "8.4" }
+      ]
+    },
+    {
+      "id": "to-py315",
+      "description": "Python 3.10–3.14 → Python 3.15 (newest), Django → 6.1 (first with Python 3.15), Flask 2 → 3.1, pytest → 9",
+      "python": "3.15",
+      "fromPython": ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"],
+      "requiresPython": ">=3.15",
+      "frameworks": { "django": "6.1", "flask": "3.1" },
+      "codemods": ["pyupgrade", "django-upgrade"],
+      "packages": [
+        { "name": "Django", "version": "6.1.3", "minimum": "6.1.3" },
+        { "name": "asgiref", "version": "3.13.0", "minimum": "3.9.1" },
+        { "name": "sqlparse", "version": "0.6.1", "minimum": "0.5.0" },
+        { "name": "pytest-django", "version": "4.14.0", "minimum": "4.9" },
+        { "name": "Flask", "version": "3.1.3", "minimum": "3.1" },
+        { "name": "Werkzeug", "version": "3.1.9", "minimum": "3.1" },
+        { "name": "Jinja2", "version": "3.1.6", "minimum": "3.1.2" },
+        { "name": "itsdangerous", "version": "2.2.0", "minimum": "2.2" },
+        { "name": "click", "version": "8.5.1", "minimum": "8.1.3" },
+        { "name": "MarkupSafe", "version": "3.0.4", "minimum": "2.1.1" },
+        { "name": "blinker", "version": "1.9.0", "minimum": "1.9" },
+        { "name": "pytest", "version": "9.2.0", "minimum": "8.4" }
+      ]
+    }
+  ],
+  "codemods": {
+    "pyupgrade": {
+      "tool": "pyupgrade",
+      "when": "always",
+      "description": "pyupgrade rewrites old syntax for the target Python (--py3XX-plus): typing.List → list, super(Cls, self) → super(), u'' prefixes, .format() → f-strings, class X(object), __future__ imports."
+    },
+    "django-upgrade": {
+      "tool": "django-upgrade",
+      "when": "djangoBelowTarget",
+      "description": "django-upgrade rewrites removed and deprecated Django APIs for the target version (--target-version): force_text → force_str, ugettext → gettext, url() → path()/re_path(), USE_L10N, default_app_config and more."
+    }
+  }
+}

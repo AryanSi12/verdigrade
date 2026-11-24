@@ -1,0 +1,4 @@
+{
+  "$comment": "Per-repository Leapfrog settings. See docs/adoption.md.",
+  "extraRulePacks": ["acme-samples"]
+}

@@ -1,0 +1,9 @@
+{
+  "id": "none",
+  "description": "No Boot modernizer checklist for this route",
+  "javaxToJakarta": false,
+  "jakartaRecipe": null,
+  "dependencyRenames": [],
+  "propertyRenames": [],
+  "removeProperties": []
+}

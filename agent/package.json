@@ -1,0 +1,32 @@
+{
+  "name": "verdigrade",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Verdigrade: deterministic upgrades for Java/Spring Boot, Node.js/TypeScript and Python/Django/Flask apps (OpenRewrite, codemods and rules packs), with an agent for fix-up and the report narrative.",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "bin": {
+    "verdigrade": "bin/leapfrog.mjs",
+    "leapfrog": "bin/leapfrog.mjs",
+    "java-migrator": "bin/leapfrog.mjs"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "vitest run",
+    "dev": "agent-sdk dev .",
+    "validate": "node bin/leapfrog.mjs validate",
+    "migrate": "node bin/leapfrog.mjs migrate"
+  },
+  "dependencies": {
+    "@grok/agent-sdk": "^0.6.0",
+    "tsx": "^4.20.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "typescript": "6.0.3",
+    "vitest": "^3.2.4"
+  }
+}

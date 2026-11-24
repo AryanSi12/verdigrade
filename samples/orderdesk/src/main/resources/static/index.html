@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order Desk</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg>
+      </span>
+      <div>
+        <h1>Order Desk</h1>
+        <p class="muted">Orders, fulfilment and revenue at a glance</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span id="runtime" class="runtime" title="Read live from GET /api/runtime">Loading runtime…</span>
+      <a class="btn btn-ghost" href="/api/export" download>Export CSV</a>
+      <button id="new-order" class="btn btn-primary" type="button">+ New order</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="kpis" aria-label="Key numbers">
+      <div class="kpi"><span class="kpi-label">Orders</span><span id="kpi-orders" class="kpi-value">–</span><span class="kpi-sub">all time</span></div>
+      <div class="kpi"><span class="kpi-label">Open</span><span id="kpi-open" class="kpi-value">–</span><span class="kpi-sub">new, paid or shipped</span></div>
+      <div class="kpi"><span class="kpi-label">Revenue</span><span id="kpi-revenue" class="kpi-value">–</span><span class="kpi-sub">excluding cancelled</span></div>
+      <div class="kpi"><span class="kpi-label">Average order</span><span id="kpi-average" class="kpi-value">–</span><span class="kpi-sub">after discounts</span></div>
+    </section>
+
+    <div class="layout">
+      <section class="card" aria-labelledby="orders-title">
+        <div class="card-head">
+          <h2 id="orders-title">Orders</h2>
+          <input id="search" class="search" type="search" placeholder="Search customer or number" aria-label="Search orders">
+        </div>
+        <nav id="filters" class="filters" aria-label="Filter by status"></nav>
+        <div class="table-wrap">
+          <table class="orders">
+            <thead>
+              <tr><th>Order</th><th>Customer</th><th class="num">Items</th><th class="num">Total</th><th>Status</th><th>Created</th></tr>
+            </thead>
+            <tbody id="rows"><tr><td colspan="6" class="empty">Loading orders…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="card" aria-labelledby="status-title">
+          <div class="card-head"><h2 id="status-title">By status</h2></div>
+          <ul id="status-bars" class="bars"></ul>
+        </section>
+        <section class="card" aria-labelledby="top-title">
+          <div class="card-head"><h2 id="top-title">Top products</h2></div>
+          <ol id="top-products" class="top"></ol>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="footer muted">Order Desk · a Verdigrade sample · <span id="footer-runtime"></span></footer>
+
+  <!-- Order detail drawer -->
+  <div id="drawer-backdrop" class="backdrop" hidden></div>
+  <aside id="drawer" class="drawer" aria-hidden="true" aria-labelledby="drawer-title">
+    <div class="drawer-head">
+      <div>
+        <p id="drawer-number" class="eyebrow"></p>
+        <h2 id="drawer-title"></h2>
+        <p id="drawer-email" class="muted"></p>
+      </div>
+      <button id="drawer-close" class="icon-btn" type="button" aria-label="Close">×</button>
+    </div>
+    <div id="drawer-body" class="drawer-body"></div>
+  </aside>
+
+  <!-- New order dialog -->
+  <div id="modal-backdrop" class="backdrop" hidden></div>
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <form id="order-form" novalidate>
+      <div class="modal-head">
+        <h2 id="modal-title">New order</h2>
+        <button id="modal-close" class="icon-btn" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <p id="form-error" class="form-error" hidden></p>
+        <div class="grid-2">
+          <label class="field">Customer<input name="customer" autocomplete="organization"><small data-error="customer"></small></label>
+          <label class="field">Email<input name="email" type="email" autocomplete="email"><small data-error="email"></small></label>
+        </div>
+        <div class="grid-2">
+          <label class="field">Tier
+            <select name="tier"><option value="STANDARD">Standard</option><option value="SILVER">Silver (5% off)</option><option value="GOLD">Gold (10% off)</option></select>
+          </label>
+          <label class="field">Note<input name="note" maxlength="200" placeholder="Optional"><small data-error="note"></small></label>
+        </div>
+        <div class="items-head"><span>Items</span><button id="add-item" class="btn btn-ghost btn-sm" type="button">+ Add item</button></div>
+        <div id="items"></div>
+        <small data-error="items"></small>
+        <div class="form-total"><span class="muted">Subtotal before discount</span><strong id="form-subtotal">$0.00</strong></div>
+      </div>
+      <div class="modal-foot">
+        <button id="modal-cancel" class="btn btn-ghost" type="button">Cancel</button>
+        <button class="btn btn-primary" type="submit">Create order</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

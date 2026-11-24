@@ -1,0 +1,947 @@
+{
+  "$comment": "Plain-language explanations for Java / Spring Boot findings (bot/lib/adapters/javaPlan.ts). Keyed by finding kind. See common.json for the format.",
+  "ecosystem": "java",
+  "entries": {
+    "recipe.java": {
+      "plainTitle": "Switch the project to Java {targetJava}",
+      "inPlainWords": "The build file is told to compile for Java {targetJava} instead of Java {fromJava}.",
+      "whatWeFound": "The build compiles for Java {fromJava}. The OpenRewrite recipe {name} will move it to Java {targetJava} ({count} file(s)).",
+      "whyItMatters": "Java {fromJava} no longer gets free security fixes in most distributions, and Spring Boot {targetBoot} needs at least Java 17.",
+      "whatWillHappen": "OpenRewrite changes the Java version setting in the build file (and fixes a few small Java API changes in the code).",
+      "ifApproved": "The build compiles for Java {targetJava}. This is needed for every other step.",
+      "ifLocked": "Locking keeps the build file ({file}) exactly as it is, which also blocks every other change to it (the Spring Boot upgrade and dependency renames). The project stays on Java {fromJava}, so the checks step fails and newer code may not compile.",
+      "manualSteps": [
+        "Set java.version (or maven.compiler.release) to {targetJava} in {file}.",
+        "Run the tests on JDK {targetJava}."
+      ],
+      "effort": "~10 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-checks",
+      "skipWhen": "primary-file",
+      "learnMore": [
+        {
+          "label": "OpenRewrite: Migrate to Java 21",
+          "url": "https://docs.openrewrite.org/recipes/java/migrate/upgradetojava21"
+        },
+        {
+          "label": "Oracle JDK 21 Migration Guide",
+          "url": "https://docs.oracle.com/en/java/javase/21/migrate/getting-started.html"
+        }
+      ]
+    },
+    "recipe.boot": {
+      "plainTitle": "Upgrade Spring Boot to {targetBoot}",
+      "inPlainWords": "The Spring Boot version in the build file goes from {fromBoot} to {targetBoot}, and the code is adjusted to match.",
+      "whatWeFound": "The project uses Spring Boot {fromBoot}. The OpenRewrite recipe {name} upgrades it ({count} file(s)).",
+      "whyItMatters": "Spring Boot {fromBoot} is out of support. The new version brings security fixes, but it also renames settings and removes old APIs, which is what the rest of the plan handles.",
+      "whatWillHappen": "OpenRewrite updates the Spring Boot parent version in the build file, the managed dependencies and known code and property changes.",
+      "ifApproved": "The project moves to Spring Boot {targetBoot}.",
+      "ifLocked": "Locking keeps the build file ({file}) as it is, which also blocks the Java upgrade. The project stays on Spring Boot {fromBoot} while other steps rewrite the code for the new version (for example javax → jakarta), so it no longer compiles and the run fails at the Test step.",
+      "manualSteps": [
+        "Change the spring-boot-starter-parent version to {targetBoot} by hand.",
+        "Follow the Spring Boot migration guide for removed APIs and renamed properties.",
+        "Run the tests."
+      ],
+      "effort": "~1–4 hr",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-build",
+      "skipWhen": "primary-file",
+      "learnMore": [
+        {
+          "label": "Spring Boot 4.0 Migration Guide",
+          "url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide"
+        },
+        {
+          "label": "Spring Boot 3.0 Migration Guide",
+          "url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Migration-Guide"
+        },
+        {
+          "label": "OpenRewrite: Upgrade to Spring Boot 4.0",
+          "url": "https://docs.openrewrite.org/recipes/java/spring/boot4/upgradespringboot_4_0-community-edition"
+        }
+      ]
+    },
+    "recipe.jakarta": {
+      "plainTitle": "Rename javax imports to jakarta ({count} file(s))",
+      "inPlainWords": "Java's web and validation packages were renamed from javax to jakarta. Each import is updated.",
+      "whatWeFound": "{count} file(s) still import javax.* packages (servlet, validation, persistence and so on) that Spring Boot {targetBoot} no longer ships.",
+      "whyItMatters": "Since Spring Boot 3, these classes only exist under the jakarta.* name. Any file that still imports javax.servlet or javax.validation stops compiling.",
+      "whatWillHappen": "OpenRewrite rewrites every javax.* import (and usage) that moved to Jakarta EE to its jakarta.* name. Only the package name changes, not your logic.",
+      "ifApproved": "The files compile against Spring Boot {targetBoot}.",
+      "ifLocked": "The locked files keep their javax imports. Those classes don't exist in Spring Boot {targetBoot}, so the code won't compile: the Test step (which compiles first) fails. The AI fix-up isn't allowed to edit locked files, so it can't rescue the run.",
+      "ifManual": "Same as locking: the files keep javax imports and the dry run fails at the Test step until you rename the imports yourself.",
+      "manualSteps": [
+        "In each file, change import javax.<package>… to import jakarta.<package>….",
+        "Update any javax.* dependency in the build file to its jakarta.* version.",
+        "Compile and run the tests."
+      ],
+      "effort": "~5 min per file",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-build",
+      "skipWhen": "any-file",
+      "learnMore": [
+        {
+          "label": "OpenRewrite: Migrate to Jakarta EE 9",
+          "url": "https://docs.openrewrite.org/recipes/java/migrate/jakarta/javaxmigrationtojakarta"
+        },
+        {
+          "label": "Spring Boot 3.0 Migration Guide (Jakarta EE)",
+          "url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Migration-Guide"
+        },
+        {
+          "label": "Jakarta EE FAQ",
+          "url": "https://jakarta.ee/about/faq/"
+        }
+      ]
+    },
+    "recipe.other": {
+      "plainTitle": "OpenRewrite step {name}",
+      "inPlainWords": "An automatic code rewrite from the approved matrix.",
+      "whatWeFound": "The route includes the OpenRewrite recipe {recipe} ({count} file(s)).",
+      "whyItMatters": "It is part of the tested upgrade route for this version jump.",
+      "whatWillHappen": "OpenRewrite runs the recipe and every change is committed as its own step.",
+      "ifApproved": "The recipe runs.",
+      "ifLocked": "Locked files are left out of the recipe. Depending on the recipe, the code may not compile or behave the same on the new version.",
+      "manualSteps": [
+        "Read the recipe's documentation and apply the same change by hand."
+      ],
+      "effort": "unknown",
+      "confidence": "low",
+      "riskIfSkipped": "medium",
+      "skipEffect": "fails-build",
+      "learnMore": []
+    },
+    "rules.config": {
+      "plainTitle": "Rename old settings in {fileName} ({count} change(s))",
+      "inPlainWords": "Some setting names changed in the new Spring Boot, so they're renamed (or removed) for you.",
+      "whatWeFound": "{fileName} uses setting names that Spring Boot {targetBoot} no longer reads: {details}.",
+      "whyItMatters": "Spring Boot ignores setting names it doesn't know. It doesn't error: the setting just silently stops working. For example, logging.file was renamed to logging.file.name, so your log file would no longer be written.",
+      "whatWillHappen": "The rules pack ({pack}) renames each old key to its new name and removes settings that no longer exist. Values stay the same.",
+      "ifApproved": "Your settings keep working on the new version.",
+      "ifLocked": "The file keeps the old names. The app still starts and the tests usually pass, but Spring Boot silently ignores those settings at runtime (for example, the log file isn't written and custom static-file paths are dropped).",
+      "manualSteps": [
+        "Rename each old key to the new name shown in the change list.",
+        "Delete the settings marked as removed.",
+        "Start the app and check the logs and static files."
+      ],
+      "effort": "~10 min",
+      "confidence": "high",
+      "riskIfSkipped": "high",
+      "skipEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "Spring Boot 4.0 Migration Guide",
+          "url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide"
+        },
+        {
+          "label": "Spring Boot common application properties",
+          "url": "https://docs.spring.io/spring-boot/appendix/application-properties/index.html"
+        }
+      ]
+    },
+    "rules.build": {
+      "plainTitle": "Update dependency names in {fileName} ({count} change(s))",
+      "inPlainWords": "A few libraries were renamed in the new Spring Boot, so the build file is updated.",
+      "whatWeFound": "{fileName} declares dependencies that were renamed: {details}.",
+      "whyItMatters": "Old names are deprecated or gone in Spring Boot {targetBoot}. Keeping them leads to warnings now and build failures later.",
+      "whatWillHappen": "The rules pack ({pack}) changes the artifact names in the build file. Versions are managed by Spring Boot.",
+      "ifApproved": "The build uses the current dependency names.",
+      "ifLocked": "Locking keeps the whole build file ({file}) unchanged, which also blocks the Java and Spring Boot upgrades on that file. The project stays on the old versions, so the run fails.",
+      "manualSteps": [
+        "Rename the artifactIds shown in the change list.",
+        "Run the build."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "low",
+      "skipEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "Spring Boot 4.0 Migration Guide",
+          "url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide"
+        }
+      ]
+    },
+    "property-conflict": {
+      "plainTitle": "The same setting is set twice (old and new name)",
+      "inPlainWords": "Both the old and the new name of a setting are present, so the tool won't guess which value you want.",
+      "whatWeFound": "{file} has both an old and a new key for the same setting.",
+      "whyItMatters": "Renaming would overwrite one of the values. Only you know which one is right.",
+      "whatWillHappen": "Nothing. The tool leaves both keys alone.",
+      "ifApproved": "Nothing changes; the new key wins at runtime and the old one is ignored.",
+      "ifLocked": "Nothing changes; the new key wins at runtime and the old one is ignored.",
+      "manualSteps": [
+        "Keep the value you want under the new key.",
+        "Delete the old key."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "low",
+      "skipEffect": "runtime",
+      "riskIfApproved": "low",
+      "approvedEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "Spring Boot common application properties",
+          "url": "https://docs.spring.io/spring-boot/appendix/application-properties/index.html"
+        }
+      ]
+    },
+    "api.security-config": {
+      "plainTitle": "Security setup uses classes that no longer exist",
+      "inPlainWords": "Your login/permission setup uses old Spring Security classes that were removed. It must be rewritten.",
+      "whatWeFound": "{file} line {line} uses WebSecurityConfigurerAdapter, antMatchers or authorizeRequests: {evidence}",
+      "whyItMatters": "These were removed in Spring Security 6 (Spring Boot 3+). The class won't compile, and a rushed rewrite can accidentally open or close endpoints.",
+      "whatWillHappen": "No automatic rewrite. If the tests fail, the AI fix-up may try to port it, but security code needs a human review.",
+      "ifApproved": "The run continues; this file likely fails to compile and the AI fix-up gets a few tries. Review any AI change to security code line by line.",
+      "ifLocked": "The AI fix-up can't touch the file, so it keeps the removed classes and the build fails at the Test step until you rewrite it.",
+      "manualSteps": [
+        "Replace the adapter class with a SecurityFilterChain @Bean.",
+        "Use authorizeHttpRequests and requestMatchers.",
+        "Test every protected endpoint (allowed and denied)."
+      ],
+      "effort": "~1–2 hr",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "blocker",
+      "approvedEffect": "fails-build",
+      "learnMore": [
+        {
+          "label": "Spring Security migration guide",
+          "url": "https://docs.spring.io/spring-security/reference/migration/index.html"
+        },
+        {
+          "label": "Spring Security Java configuration",
+          "url": "https://docs.spring.io/spring-security/reference/servlet/configuration/java.html"
+        }
+      ]
+    },
+    "api.mvc-adapter": {
+      "plainTitle": "Uses a Spring MVC helper class that was removed",
+      "inPlainWords": "WebMvcConfigurerAdapter / HandlerInterceptorAdapter are gone. The fix is small: implement the interface directly.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "The class was removed in Spring Framework 6, so this file stops compiling.",
+      "whatWillHappen": "No automatic rewrite in the pinned recipes. The AI fix-up may fix it if the tests fail.",
+      "ifApproved": "The build likely fails first; the AI fix-up usually handles this easy change.",
+      "ifLocked": "The file keeps the removed class and the build fails at the Test step.",
+      "manualSteps": [
+        "Change 'extends WebMvcConfigurerAdapter' to 'implements WebMvcConfigurer' (or HandlerInterceptor).",
+        "Compile."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "medium",
+      "approvedEffect": "fails-build",
+      "learnMore": [
+        {
+          "label": "Upgrading to Spring Framework 6.x",
+          "url": "https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x"
+        }
+      ]
+    },
+    "api.commons-multipart": {
+      "plainTitle": "File upload setup uses a removed class",
+      "inPlainWords": "CommonsMultipartResolver is gone; Spring Boot now handles uploads itself.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "The class was removed in Spring Framework 6, so this file stops compiling.",
+      "whatWillHappen": "No automatic rewrite. The AI fix-up may remove the bean if the tests fail.",
+      "ifApproved": "The build likely fails first; the AI fix-up may fix it.",
+      "ifLocked": "The file keeps the removed class and the build fails at the Test step.",
+      "manualSteps": [
+        "Delete the CommonsMultipartResolver bean.",
+        "Configure upload limits with spring.servlet.multipart.* settings.",
+        "Test a file upload."
+      ],
+      "effort": "~15 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "medium",
+      "approvedEffect": "fails-build",
+      "learnMore": [
+        {
+          "label": "Upgrading to Spring Framework 6.x",
+          "url": "https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x"
+        }
+      ]
+    },
+    "api.mockbean": {
+      "plainTitle": "Tests use @MockBean, which Spring Boot 4 removed",
+      "inPlainWords": "The test annotation @MockBean was replaced by @MockitoBean.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "@MockBean and @SpyBean were removed in Spring Boot 4, so these tests no longer compile.",
+      "whatWillHappen": "The Boot 4 recipe may convert it; if not, the AI fix-up may when the tests fail.",
+      "ifApproved": "Usually fixed by the recipe or the AI fix-up.",
+      "ifLocked": "The test keeps @MockBean and the test step fails to compile.",
+      "manualSteps": [
+        "Replace @MockBean with @MockitoBean (and @SpyBean with @MockitoSpyBean).",
+        "Update the imports to org.springframework.test.context.bean.override.mockito."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "low",
+      "approvedEffect": "fails-build",
+      "learnMore": [
+        {
+          "label": "Spring Boot 4.0 Migration Guide",
+          "url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide"
+        }
+      ]
+    },
+    "api.jackson2": {
+      "plainTitle": "Jackson 2 code in {fileCount} file(s) moves to Jackson 3",
+      "inPlainWords": "Spring Boot 4 uses Jackson 3 for JSON. The Boot 4 recipe renames most Jackson 2 imports for you; custom setup may still behave differently.",
+      "whatWeFound": "{fileCount} file(s) use Jackson 2 classes, first at {file} line {line}: {evidence}",
+      "whyItMatters": "If your custom ObjectMapper or serializers aren't picked up, JSON output can change (dates, null fields, naming) without any error.",
+      "whatWillHappen": "The recipe renames com.fasterxml.jackson imports to tools.jackson where it can. Check JSON output after the run.",
+      "ifApproved": "The code still compiles; check your API's JSON output after the run.",
+      "ifLocked": "The file stays on Jackson 2 types; the same runtime risk remains and the AI fix-up can't touch it.",
+      "manualSteps": [
+        "Compare the JSON your API returns before and after.",
+        "Move custom configuration to Jackson 3 types (tools.jackson.*) or keep Jackson 2 on purpose."
+      ],
+      "effort": "~30 min",
+      "confidence": "medium",
+      "riskIfSkipped": "medium",
+      "skipEffect": "runtime",
+      "riskIfApproved": "medium",
+      "approvedEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "Spring Boot 4.0 Migration Guide",
+          "url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide"
+        }
+      ]
+    },
+    "api.global-method-security": {
+      "plainTitle": "Old annotation for method-level security",
+      "inPlainWords": "@EnableGlobalMethodSecurity is replaced by @EnableMethodSecurity.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "It is deprecated and its defaults differ, so method security rules can behave differently.",
+      "whatWillHappen": "No automatic change.",
+      "ifApproved": "It still works for now; plan to switch.",
+      "ifLocked": "Same as approving; the AI fix-up can't touch the file.",
+      "manualSteps": [
+        "Switch to @EnableMethodSecurity.",
+        "Check prePostEnabled / securedEnabled settings.",
+        "Test protected methods."
+      ],
+      "effort": "~15 min",
+      "confidence": "high",
+      "riskIfSkipped": "low",
+      "skipEffect": "runtime",
+      "riskIfApproved": "low",
+      "approvedEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "Spring Security migration guide",
+          "url": "https://docs.spring.io/spring-security/reference/migration/index.html"
+        }
+      ]
+    },
+    "api.hibernate-type": {
+      "plainTitle": "Custom database column type uses an old Hibernate style",
+      "inPlainWords": "Hibernate 6 changed how custom column types are declared.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "@Type(type = \"…\") doesn't compile with Hibernate 6, and porting it wrong can corrupt how data is read or written.",
+      "whatWillHappen": "No automatic rewrite.",
+      "ifApproved": "The build likely fails; the AI fix-up may try, but check data round-trips by hand.",
+      "ifLocked": "The file keeps the old annotation and the build fails at the Test step.",
+      "manualSteps": [
+        "Port the type to the Hibernate 6 UserType API or @JdbcTypeCode.",
+        "Test saving and loading that column."
+      ],
+      "effort": "~1 hr",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "blocker",
+      "approvedEffect": "fails-build",
+      "learnMore": [
+        {
+          "label": "Hibernate ORM 6.0 migration guide",
+          "url": "https://github.com/hibernate/hibernate-orm/blob/6.0/migration-guide.adoc"
+        }
+      ]
+    },
+    "api.error-path": {
+      "plainTitle": "Error page code overrides a method that no longer exists",
+      "inPlainWords": "getErrorPath() was removed from ErrorController.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "An @Override on a method that no longer exists fails to compile.",
+      "whatWillHappen": "No automatic rewrite; the AI fix-up usually handles it.",
+      "ifApproved": "The build likely fails first, then the AI fix-up removes the method.",
+      "ifLocked": "The file keeps the method and the build fails at the Test step.",
+      "manualSteps": [
+        "Delete the getErrorPath() method.",
+        "Set server.error.path if you need a custom path."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "low",
+      "approvedEffect": "fails-build",
+      "learnMore": [
+        {
+          "label": "Spring Boot 3.0 Migration Guide",
+          "url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Migration-Guide"
+        }
+      ]
+    },
+    "api.jdk-internal": {
+      "plainTitle": "Uses hidden JDK internals",
+      "inPlainWords": "The code reaches into private parts of the JDK, which Java {targetJava} blocks by default.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "Since Java 17, JDK internals are sealed off. The code may compile but crash at runtime with an IllegalAccessError.",
+      "whatWillHappen": "No automatic change.",
+      "ifApproved": "It may work in tests but fail in production paths that use it.",
+      "ifLocked": "Same runtime risk; the AI fix-up can't touch the file.",
+      "manualSteps": [
+        "Replace it with a supported API (VarHandle, java.util.Base64…).",
+        "If impossible, add the needed --add-opens flag and document why."
+      ],
+      "effort": "~30 min",
+      "confidence": "medium",
+      "riskIfSkipped": "high",
+      "skipEffect": "runtime",
+      "riskIfApproved": "high",
+      "approvedEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "JEP 403: Strongly encapsulate JDK internals",
+          "url": "https://openjdk.org/jeps/403"
+        }
+      ]
+    },
+    "api.security-manager": {
+      "plainTitle": "Uses the Java SecurityManager, which is being removed",
+      "inPlainWords": "SecurityManager is switched off for good in newer Java.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "Deprecated since Java 17 and permanently disabled in Java 24. Code relying on it stops enforcing anything.",
+      "whatWillHappen": "No automatic change.",
+      "ifApproved": "Still works on Java 21 with warnings.",
+      "ifLocked": "Same as approving; the AI fix-up can't touch the file.",
+      "manualSteps": [
+        "Remove the SecurityManager usage.",
+        "Enforce the policy another way (container, OS or code checks)."
+      ],
+      "effort": "~1 hr",
+      "confidence": "high",
+      "riskIfSkipped": "low",
+      "skipEffect": "runtime",
+      "riskIfApproved": "low",
+      "approvedEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "JEP 411: Deprecate the Security Manager",
+          "url": "https://openjdk.org/jeps/411"
+        },
+        {
+          "label": "JEP 486: Permanently disable the Security Manager",
+          "url": "https://openjdk.org/jeps/486"
+        }
+      ]
+    },
+    "api.boxed-constructor": {
+      "plainTitle": "Old way of creating numbers (new Integer(…))",
+      "inPlainWords": "A small cleanup: new Integer(5) should be Integer.valueOf(5).",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "These constructors are deprecated for removal. Today they only cause warnings.",
+      "whatWillHappen": "The Java upgrade recipe often fixes these; otherwise nothing changes.",
+      "ifApproved": "Compiles with warnings on Java {targetJava}.",
+      "ifLocked": "Compiles with warnings on Java {targetJava}.",
+      "manualSteps": [
+        "Replace new Integer(x) with Integer.valueOf(x) (same for Long, Double…)."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "low",
+      "skipEffect": "none",
+      "riskIfApproved": "none",
+      "approvedEffect": "none",
+      "learnMore": [
+        {
+          "label": "JEP 390: Warnings for value-based classes",
+          "url": "https://openjdk.org/jeps/390"
+        }
+      ]
+    },
+    "api.finalize": {
+      "plainTitle": "Uses finalize(), which Java plans to remove",
+      "inPlainWords": "Cleanup code in finalize() may stop running in a future Java.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "Finalization is deprecated for removal. Resources it frees (files, connections) could leak later.",
+      "whatWillHappen": "No automatic change.",
+      "ifApproved": "Still works on Java {targetJava}.",
+      "ifLocked": "Still works on Java {targetJava}.",
+      "manualSteps": [
+        "Use try-with-resources or java.lang.ref.Cleaner instead."
+      ],
+      "effort": "~30 min",
+      "confidence": "high",
+      "riskIfSkipped": "low",
+      "skipEffect": "runtime",
+      "riskIfApproved": "low",
+      "approvedEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "JEP 421: Deprecate finalization for removal",
+          "url": "https://openjdk.org/jeps/421"
+        },
+        {
+          "label": "java.lang.ref.Cleaner",
+          "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/ref/Cleaner.html"
+        }
+      ]
+    },
+    "spring-factories": {
+      "plainTitle": "Auto-configuration registered the old way",
+      "inPlainWords": "Spring Boot 3+ no longer reads this registration file, so your auto-configuration silently stops loading.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "No error is shown; beans just stop being created, and features break at runtime.",
+      "whatWillHappen": "No automatic move.",
+      "ifApproved": "The app may start without those beans; tests that use them fail.",
+      "ifLocked": "Same: the classes are not loaded on the new version.",
+      "manualSteps": [
+        "Move the class names to META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports (one per line).",
+        "Start the app and check the beans exist."
+      ],
+      "effort": "~15 min",
+      "confidence": "high",
+      "riskIfSkipped": "high",
+      "skipEffect": "runtime",
+      "riskIfApproved": "high",
+      "approvedEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "Spring Boot: creating your own auto-configuration",
+          "url": "https://docs.spring.io/spring-boot/reference/features/developing-auto-configuration.html"
+        },
+        {
+          "label": "Spring Boot 3.0 Migration Guide",
+          "url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Migration-Guide"
+        }
+      ]
+    },
+    "reflection": {
+      "plainTitle": "Loads classes by name (reflection)",
+      "inPlainWords": "Class names written as text are invisible to the rewrite tools, so a renamed class is only found when the code runs.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "If a name points to a javax.* class or a removed API, it compiles fine but throws ClassNotFoundException at runtime.",
+      "whatWillHappen": "No automatic change.",
+      "ifApproved": "The run can pass while this code path fails in production.",
+      "ifLocked": "Same runtime risk; the AI fix-up can't touch the file.",
+      "manualSteps": [
+        "Check every class or member name used here against the target versions.",
+        "Add a test that runs this code path."
+      ],
+      "effort": "~15 min",
+      "confidence": "medium",
+      "riskIfSkipped": "medium",
+      "skipEffect": "runtime",
+      "riskIfApproved": "medium",
+      "approvedEffect": "runtime",
+      "learnMore": []
+    },
+    "javax-string": {
+      "plainTitle": "A javax class name written inside a string",
+      "inPlainWords": "The jakarta rename doesn't change text in quotes, so this still points to the old name.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "The code will look up a class that no longer exists and fail at runtime.",
+      "whatWillHappen": "No automatic change.",
+      "ifApproved": "The run can pass while this lookup fails at runtime.",
+      "ifLocked": "Same runtime risk; the AI fix-up can't touch the file.",
+      "manualSteps": [
+        "Change the text from javax.… to jakarta.….",
+        "Run the code path that uses it."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "high",
+      "skipEffect": "runtime",
+      "riskIfApproved": "high",
+      "approvedEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "Jakarta EE FAQ",
+          "url": "https://jakarta.ee/about/faq/"
+        }
+      ]
+    },
+    "generated-code": {
+      "plainTitle": "Generated code still uses javax",
+      "inPlainWords": "This file is produced by a generator. Editing it doesn't stick: the next build makes it again.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "If the generator isn't upgraded, it keeps producing javax code that won't compile on the new version.",
+      "whatWillHappen": "Locked by default so the recipe leaves it alone.",
+      "ifApproved": "The recipe rewrites the file, but the next code generation brings javax back.",
+      "ifLocked": "The file keeps javax and may not compile until the generator is upgraded.",
+      "manualSteps": [
+        "Upgrade the generator or turn on its jakarta option.",
+        "Regenerate the code."
+      ],
+      "effort": "~30 min",
+      "confidence": "high",
+      "riskIfSkipped": "high",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "medium",
+      "approvedEffect": "after-merge",
+      "learnMore": [
+        {
+          "label": "Spring Boot 3.0 Migration Guide (Jakarta EE)",
+          "url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Migration-Guide"
+        }
+      ]
+    },
+    "native-method": {
+      "plainTitle": "Calls native (C/C++) code",
+      "inPlainWords": "The library behind this method must be rebuilt and tested on Java {targetJava}.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "Native libraries can crash the JVM if they don't match the new runtime.",
+      "whatWillHappen": "Nothing is edited.",
+      "ifApproved": "Nothing changes; the library still needs a rebuild.",
+      "ifLocked": "Nothing changes; the library still needs a rebuild.",
+      "manualSteps": [
+        "Rebuild the native library for JDK {targetJava}.",
+        "Run the code that calls it."
+      ],
+      "effort": "~1–4 hr",
+      "confidence": "medium",
+      "riskIfSkipped": "high",
+      "skipEffect": "runtime",
+      "riskIfApproved": "high",
+      "approvedEffect": "runtime",
+      "learnMore": []
+    },
+    "dependency.no-jakarta": {
+      "plainTitle": "A library with no version for the new Spring Boot",
+      "inPlainWords": "This library has no Jakarta-ready version; it needs replacing or upgrading.",
+      "whatWeFound": "{file} line {line}: {message}",
+      "whyItMatters": "Old libraries built for javax can fail to compile or crash at startup on Spring Boot {targetBoot}.",
+      "whatWillHappen": "No automatic change.",
+      "ifApproved": "The run may fail at the Test step; the AI fix-up may try to adjust it.",
+      "ifLocked": "The build file is locked, which also blocks the Java and Spring Boot upgrades on it.",
+      "manualSteps": [
+        "Replace or upgrade the library as described.",
+        "Run the tests."
+      ],
+      "effort": "~30 min",
+      "confidence": "medium",
+      "riskIfSkipped": "high",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "medium",
+      "approvedEffect": "fails-build",
+      "learnMore": [
+        {
+          "label": "Spring Boot 3.0 Migration Guide",
+          "url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Migration-Guide"
+        }
+      ]
+    },
+    "dependency.lombok": {
+      "plainTitle": "Lombok {version} is too old for Java {targetJava}",
+      "inPlainWords": "Lombok must be 1.18.30 or newer to work on Java 21.",
+      "whatWeFound": "{file} line {line} pins Lombok {version}.",
+      "whyItMatters": "Older Lombok versions crash the compiler on JDK 21, so nothing compiles.",
+      "whatWillHappen": "No automatic change; the AI fix-up may bump it after the build fails.",
+      "ifApproved": "The build likely fails first; the AI fix-up can usually bump the version.",
+      "ifLocked": "The build file is locked, which also blocks the Java and Spring Boot upgrades on it.",
+      "manualSteps": [
+        "Upgrade Lombok to 1.18.30 or later (or drop the version and use the one Spring Boot manages)."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "medium",
+      "approvedEffect": "fails-build",
+      "learnMore": [
+        {
+          "label": "Project Lombok changelog",
+          "url": "https://projectlombok.org/changelog"
+        }
+      ]
+    },
+    "generator-plugin": {
+      "plainTitle": "A code generator plugin ({evidence})",
+      "inPlainWords": "This plugin generates code, which may still use javax unless the plugin is upgraded.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "Generated code is recreated on every build, so the jakarta rename doesn't stick unless the generator is configured for Jakarta.",
+      "whatWillHappen": "No automatic change.",
+      "ifApproved": "The build may fail on generated javax code; the AI fix-up may try.",
+      "ifLocked": "The build file is locked, which also blocks the Java and Spring Boot upgrades on it.",
+      "manualSteps": [
+        "Upgrade the plugin to a Jakarta-ready version or enable its jakarta option.",
+        "Rebuild."
+      ],
+      "effort": "~30 min",
+      "confidence": "medium",
+      "riskIfSkipped": "high",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "medium",
+      "approvedEffect": "fails-build",
+      "learnMore": [
+        {
+          "label": "Apache Maven plugins",
+          "url": "https://maven.apache.org/plugins/index.html"
+        }
+      ]
+    },
+    "custom-build.plugin": {
+      "plainTitle": "Custom build step ({plugin})",
+      "inPlainWords": "A script or packaging step may hard-code the old Java version or paths.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "No recipe understands custom scripts; they can break packaging or deployment after the upgrade.",
+      "whatWillHappen": "Nothing is edited.",
+      "ifApproved": "Nothing changes in this plugin's configuration.",
+      "ifLocked": "The build file is locked, which also blocks the Java and Spring Boot upgrades on it. Prefer 'Manual' without a lock unless you mean it.",
+      "manualSteps": [
+        "Read the plugin configuration.",
+        "Update anything that depends on the old Java or Spring Boot version."
+      ],
+      "effort": "~30 min",
+      "confidence": "low",
+      "riskIfSkipped": "medium",
+      "skipEffect": "after-merge",
+      "riskIfApproved": "medium",
+      "approvedEffect": "after-merge",
+      "learnMore": [
+        {
+          "label": "Apache Maven plugins",
+          "url": "https://maven.apache.org/plugins/index.html"
+        }
+      ]
+    },
+    "custom-build.buildsrc": {
+      "plainTitle": "Custom Gradle build logic (buildSrc)",
+      "inPlainWords": "Your own Gradle plugins aren't upgraded by the tool.",
+      "whatWeFound": "The project has a buildSrc/ folder with custom Gradle logic.",
+      "whyItMatters": "Hard-coded Java versions or toolchains there keep the build on the old Java.",
+      "whatWillHappen": "Nothing is edited.",
+      "ifApproved": "Nothing changes in buildSrc.",
+      "ifLocked": "Nothing changes in buildSrc.",
+      "manualSteps": [
+        "Update Java/toolchain versions in buildSrc.",
+        "Run the build."
+      ],
+      "effort": "~30 min",
+      "confidence": "medium",
+      "riskIfSkipped": "medium",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "medium",
+      "approvedEffect": "fails-build",
+      "learnMore": [
+        {
+          "label": "Gradle toolchains",
+          "url": "https://docs.gradle.org/current/userguide/toolchains.html"
+        }
+      ]
+    },
+    "build-plugin": {
+      "plainTitle": "Build plugin to double-check ({evidence})",
+      "inPlainWords": "A plugin the route doesn't know; it may need a newer version for Java {targetJava}.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "Old plugin versions sometimes fail on a newer JDK.",
+      "whatWillHappen": "No automatic change.",
+      "ifApproved": "Usually fine; if the build fails, the AI fix-up may bump it.",
+      "ifLocked": "The build file is locked, which also blocks the Java and Spring Boot upgrades on it.",
+      "manualSteps": [
+        "Check the plugin supports JDK {targetJava}; bump its version if needed."
+      ],
+      "effort": "~10 min",
+      "confidence": "low",
+      "riskIfSkipped": "low",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "low",
+      "approvedEffect": "fails-build",
+      "learnMore": [
+        {
+          "label": "Apache Maven plugins",
+          "url": "https://maven.apache.org/plugins/index.html"
+        }
+      ]
+    },
+    "jvm-flags": {
+      "plainTitle": "Old JVM flags in the build",
+      "inPlainWords": "Some Java start-up flags were removed; the JVM refuses to start with them.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "--illegal-access was removed in Java 17; tests or the app won't start with it.",
+      "whatWillHappen": "No automatic change.",
+      "ifApproved": "Tests may fail to start; the AI fix-up may remove the flag.",
+      "ifLocked": "The build file is locked, which also blocks the Java and Spring Boot upgrades on it.",
+      "manualSteps": [
+        "Remove --illegal-access.",
+        "Re-check each --add-opens entry on JDK {targetJava}."
+      ],
+      "effort": "~15 min",
+      "confidence": "high",
+      "riskIfSkipped": "high",
+      "skipEffect": "fails-tests",
+      "riskIfApproved": "medium",
+      "approvedEffect": "fails-tests",
+      "learnMore": [
+        {
+          "label": "JEP 403: Strongly encapsulate JDK internals",
+          "url": "https://openjdk.org/jeps/403"
+        }
+      ]
+    },
+    "web-xml": {
+      "plainTitle": "Old-style web.xml configuration",
+      "inPlainWords": "Servlets and filters set up in web.xml aren't moved to Spring Boot automatically.",
+      "whatWeFound": "{file} is a web.xml deployment descriptor.",
+      "whyItMatters": "Spring Boot's embedded server ignores web.xml, so the filters and servlets listed there silently stop running.",
+      "whatWillHappen": "No automatic change.",
+      "ifApproved": "The run can pass while those filters/servlets are missing at runtime.",
+      "ifLocked": "Same runtime risk.",
+      "manualSteps": [
+        "Register each servlet, filter and listener as a @Bean.",
+        "Delete web.xml once everything is moved."
+      ],
+      "effort": "~1–2 hr",
+      "confidence": "medium",
+      "riskIfSkipped": "high",
+      "skipEffect": "runtime",
+      "riskIfApproved": "high",
+      "approvedEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "Jakarta Servlet 6.0",
+          "url": "https://jakarta.ee/specifications/servlet/6.0/"
+        }
+      ]
+    },
+    "classic-spring": {
+      "plainTitle": "Plain Spring app (not Spring Boot)",
+      "inPlainWords": "The Spring Boot recipes only work on Spring Boot apps, so this needs manual setup first.",
+      "whatWeFound": "{file} uses Spring Framework without a Spring Boot parent.",
+      "whyItMatters": "Without Spring Boot, the upgrade can only change the Java version; the app setup must be moved by hand.",
+      "whatWillHappen": "Only the Java-level recipes run.",
+      "ifApproved": "Java is upgraded; Spring stays as it is until you convert it.",
+      "ifLocked": "The build file is locked, so even the Java upgrade is blocked.",
+      "manualSteps": [
+        "Add spring-boot-starter-parent and a @SpringBootApplication class.",
+        "Replace XML configuration with Java configuration."
+      ],
+      "effort": "~1 day",
+      "confidence": "medium",
+      "riskIfSkipped": "high",
+      "skipEffect": "fails-checks",
+      "riskIfApproved": "medium",
+      "approvedEffect": "fails-checks",
+      "learnMore": [
+        {
+          "label": "Upgrading to Spring Framework 6.x",
+          "url": "https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x"
+        }
+      ]
+    },
+    "build-config.java-level": {
+      "plainTitle": "Couldn't read the Java version from the build",
+      "inPlainWords": "The Java version comes from a variable the scanner couldn't follow.",
+      "whatWeFound": "{file} sets the Java level through a property chain.",
+      "whyItMatters": "The Java recipe runs anyway; a parent POM or profile could still override it.",
+      "whatWillHappen": "The Java upgrade recipe runs unconditionally.",
+      "ifApproved": "Check the effective Java level after the run.",
+      "ifLocked": "The build file is locked, which also blocks the Java and Spring Boot upgrades on it.",
+      "manualSteps": [
+        "Check the parent POM and profiles for the Java version.",
+        "Run mvn help:effective-pom to confirm."
+      ],
+      "effort": "~10 min",
+      "confidence": "medium",
+      "riskIfSkipped": "medium",
+      "skipEffect": "fails-checks",
+      "riskIfApproved": "low",
+      "approvedEffect": "fails-checks",
+      "learnMore": []
+    },
+    "api.jackson2-spring-bridge": {
+      "plainTitle": "A Jackson 2 mapper is passed to a Spring class that now expects Jackson 3",
+      "inPlainWords": "This line hands a Jackson 2 ObjectMapper to {api}. After the upgrade the types no longer match, so the code won't compile.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "Spring Boot 4 moves to Jackson 3 (tools.jackson.*). {api} is the Jackson 2 variant; the recipe renames your ObjectMapper to Jackson 3, and then this constructor call no longer fits. The build stops with a compile error.",
+      "whatWillHappen": "No automatic fix. The build fails at this line until you change it.",
+      "ifApproved": "The run goes ahead and the build fails here (the AI fix-up may try to repair it).",
+      "ifLocked": "The file stays as it is, so it still fails to compile against Spring Boot 4. You need to change it yourself.",
+      "manualSteps": [
+        "Use {replacement} instead of {api}.",
+        "Build the mapper with JsonMapper.builder() (Jackson 3); java.time support is built in, so JavaTimeModule is no longer needed.",
+        "Re-run the plan check to confirm it is fixed."
+      ],
+      "effort": "~15 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "blocker",
+      "approvedEffect": "fails-build",
+      "learnMore": [
+        {
+          "label": "Spring Boot 4.0 Migration Guide",
+          "url": "https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide"
+        }
+      ]
+    },
+    "api.dao-auth-provider": {
+      "plainTitle": "DaoAuthenticationProvider now needs the UserDetailsService in its constructor",
+      "inPlainWords": "Spring Security 7 removed the empty constructor and setUserDetailsService(). This code won't compile after the upgrade.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "Spring Boot 4 ships Spring Security 7, where new DaoAuthenticationProvider() and setUserDetailsService(...) no longer exist. The build stops with a compile error.",
+      "whatWillHappen": "No automatic fix. The build fails at this line until you change it.",
+      "ifApproved": "The run goes ahead and the build fails here (the AI fix-up may try to repair it).",
+      "ifLocked": "The file stays as it is, so it still fails to compile against Spring Boot 4. You need to change it yourself.",
+      "manualSteps": [
+        "Pass your UserDetailsService to the constructor: new DaoAuthenticationProvider({userDetails}).",
+        "Delete the setUserDetailsService(...) line.",
+        "Re-run the plan check to confirm it is fixed."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "blocker",
+      "approvedEffect": "fails-build",
+      "learnMore": [
+        {
+          "label": "Spring Security 7 migration",
+          "url": "https://docs.spring.io/spring-security/reference/migration/index.html"
+        }
+      ]
+    },
+    "api.security-and": {
+      "plainTitle": "Security config chains with .and(), which Spring Security 7 removed",
+      "inPlainWords": "The old chained style (.and()) is gone in Spring Security 7. This security setup won't compile after the upgrade.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "Spring Boot 4 ships Spring Security 7. The and() methods were removed in favour of the lambda style, so the filter chain no longer compiles.",
+      "whatWillHappen": "No automatic fix. The build fails here until you change it.",
+      "ifApproved": "The run goes ahead and the build fails here (the AI fix-up may try to repair it).",
+      "ifLocked": "The file stays as it is, so it still fails to compile against Spring Boot 4. You need to change it yourself.",
+      "manualSteps": [
+        "Rewrite each section with the lambda style, e.g. http.csrf(csrf -> csrf.disable()).cors(Customizer.withDefaults()).",
+        "Remove every .and() call.",
+        "Re-test login and protected endpoints."
+      ],
+      "effort": "~30 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-build",
+      "riskIfApproved": "blocker",
+      "approvedEffect": "fails-build",
+      "learnMore": [
+        {
+          "label": "Spring Security 7 migration",
+          "url": "https://docs.spring.io/spring-security/reference/migration/index.html"
+        }
+      ]
+    }
+  }
+}

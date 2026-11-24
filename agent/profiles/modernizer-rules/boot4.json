@@ -1,0 +1,18 @@
+{
+  "id": "boot4",
+  "description": "Deterministic follow-ups after the Spring Boot 4.0 OpenRewrite recipes. Every rule is anchored and idempotent.",
+  "javaxToJakarta": true,
+  "jakartaRecipe": {
+    "artifact": "rewrite-migrate-java",
+    "recipe": "org.openrewrite.java.migrate.jakarta.JavaxMigrationToJakarta"
+  },
+  "dependencyRenames": [
+    { "groupId": "org.springframework.boot", "from": "spring-boot-starter-web", "to": "spring-boot-starter-webmvc" }
+  ],
+  "propertyRenames": [
+    { "from": "logging.file", "to": "logging.file.name" },
+    { "from": "spring.resources.static-locations", "to": "spring.web.resources.static-locations" },
+    { "from": "spring.http.encoding.charset", "to": "server.servlet.encoding.charset" }
+  ],
+  "removeProperties": []
+}

@@ -1,0 +1,42 @@
+# Dependencies and builds
+node_modules/
+dist/
+web/dist/
+
+# Agent runtime data (run history, logs, local dev state)
+agent/data/
+agent/memory/
+agent/.agent-serve/
+*.db
+*.db-journal
+
+# Sample build output (samples write logs/*.log through logging.file.name)
+samples/*/target/
+samples/*/logs/
+samples/*/build/
+samples/*/.gradle/
+
+# Logs, env and editors
+*.log
+.env
+.env.*
+.idea/
+.vscode/
+.DS_Store
+
+# More build output, caches and local state
+.logs/
+**/target/
+**/build/
+coverage/
+.cache/
+.vite/
+**/__pycache__/
+*.pyc
+.venv/
+venv/
+**/.gradle/
+*.zip
+*.tsbuildinfo
+migration-plan.json
+migration-report/

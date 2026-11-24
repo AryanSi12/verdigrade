@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Team Task Board</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">&#9638;</span>
+      <div>
+        <h1>Team Task Board</h1>
+        <p>Plain HTML, CSS and JavaScript on a Spring Boot backend</p>
+      </div>
+    </div>
+    <div class="top-right">
+      <span id="runtime-pill" class="pill pill-runtime" title="Read from GET /api/runtime">Reading runtime&hellip;</span>
+    </div>
+  </header>
+
+  <main>
+    <div id="board">
+      <section class="stats" aria-label="Task statistics">
+        <article class="stat"><span class="stat-label">Total</span><strong id="stat-total">&ndash;</strong></article>
+        <article class="stat"><span class="stat-label">Open</span><strong id="stat-open">&ndash;</strong></article>
+        <article class="stat"><span class="stat-label">Done</span><strong id="stat-done">&ndash;</strong></article>
+        <article class="stat stat-warn"><span class="stat-label">Overdue</span><strong id="stat-overdue">&ndash;</strong></article>
+      </section>
+      <p id="next-due" class="next-due">&hellip;</p>
+
+      <div class="columns">
+        <section class="card" aria-labelledby="add-title">
+          <h2 id="add-title">Add a task</h2>
+          <form id="task-form" novalidate>
+            <label>Title
+              <input id="f-title" name="title" maxlength="200" placeholder="What needs doing?">
+              <span class="field-error" data-for="title"></span>
+            </label>
+            <label><span>Notes <span class="muted">(optional)</span></span>
+              <textarea id="f-notes" name="notes" rows="2"></textarea>
+              <span class="field-error" data-for="notes"></span>
+            </label>
+            <div class="row">
+              <label>Priority
+                <select id="f-priority" name="priority">
+                  <option value="">Choose&hellip;</option>
+                  <option value="HIGH">High</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="LOW">Low</option>
+                </select>
+                <span class="field-error" data-for="priority"></span>
+              </label>
+              <label><span>Due date <span class="muted">(optional)</span></span>
+                <input id="f-due" name="dueDate" type="date">
+                <span class="field-error" data-for="dueDate"></span>
+              </label>
+            </div>
+            <button class="btn btn-primary" type="submit">Add task</button>
+          </form>
+        </section>
+
+        <section class="card" aria-labelledby="list-title">
+          <div class="list-head">
+            <h2 id="list-title">Tasks</h2>
+            <div class="filters" role="group" aria-label="Filter tasks">
+              <button class="chip is-active" type="button" data-status="all">All</button>
+              <button class="chip" type="button" data-status="open">Open</button>
+              <button class="chip" type="button" data-status="done">Done</button>
+              <select id="filter-priority" aria-label="Priority filter">
+                <option value="">Any priority</option>
+                <option value="HIGH">High</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="LOW">Low</option>
+              </select>
+            </div>
+          </div>
+          <ul id="task-list" class="tasks" aria-live="polite"></ul>
+          <p id="empty" class="muted empty" hidden>No tasks match this filter.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <span id="runtime-detail">Runtime: reading&hellip;</span>
+    <span id="api-stats" title="From the X-Request-Count and X-Uptime-Seconds response headers">API calls handled: &ndash;</span>
+  </footer>
+
+  <div id="toasts" class="toasts" role="status" aria-live="assertive"></div>
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

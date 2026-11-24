@@ -1,0 +1,8 @@
+[project]
+name = "inventory"
+version = "1.4.0"
+description = "Small Flask inventory API used as a pre-migration sample."
+requires-python = ">=3.8"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

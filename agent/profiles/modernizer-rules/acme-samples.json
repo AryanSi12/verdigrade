@@ -1,0 +1,10 @@
+{
+  "id": "acme-samples",
+  "description": "Sample-only pack for the bundled samples/ apps. Enabled per repository through .leapfrog.json (extraRulePacks), never by an org route.",
+  "sampleOnly": true,
+  "javaxToJakarta": false,
+  "jakartaRecipe": null,
+  "dependencyRenames": [],
+  "propertyRenames": [],
+  "removeProperties": ["acme.legacy.boot2-mode"]
+}

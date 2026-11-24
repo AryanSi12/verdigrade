@@ -1,0 +1,701 @@
+{
+  "$comment": "Plain-language explanations for Python / Django / Flask findings (bot/lib/adapters/python.ts). Keyed by finding kind. See common.json for the format. Facts checked against docs.python.org What's New 3.12-3.14, PEP 594/632, the Flask and Werkzeug changelogs and the Django deprecation timeline on 2026-11-13.",
+  "ecosystem": "python",
+  "entries": {
+    "codemod.pyupgrade": {
+      "plainTitle": "Modernise the Python syntax ({name})",
+      "inPlainWords": "pyupgrade rewrites old-style code into the form current Python prefers. It doesn't change what the code does.",
+      "whatWeFound": "{count} file(s) still use older syntax, such as typing.List, super(Class, self), u\"\" strings, .format() or class X(object).",
+      "whyItMatters": "The old forms still run, but they're noise in every review and some (typing.List and friends) are deprecated. Cleaning them now keeps later upgrades small.",
+      "whatWillHappen": "pyupgrade {flag} runs on every unlocked .py file. Its changes are committed on their own so you can review them.",
+      "ifApproved": "The code uses modern syntax; behaviour stays the same.",
+      "ifLocked": "Locked files keep the old syntax. That's fine: Python {targetPython} still runs it, so nothing breaks. The rest of the project is still rewritten.",
+      "manualSteps": [
+        "Run pyupgrade {flag} on the locked files later, when you're ready.",
+        "Review the diff for files you care about."
+      ],
+      "effort": "~5 min review",
+      "confidence": "high",
+      "riskIfSkipped": "low",
+      "skipEffect": "none",
+      "riskIfApproved": "none",
+      "approvedEffect": "none",
+      "skipWhen": "primary-file",
+      "learnMore": [
+        {
+          "label": "pyupgrade",
+          "url": "https://github.com/asottile/pyupgrade"
+        }
+      ]
+    },
+    "codemod.django-upgrade": {
+      "plainTitle": "Update Django code for Django {django} ({name})",
+      "inPlainWords": "django-upgrade rewrites Django calls that were removed or renamed, so the code works on Django {django}.",
+      "whatWeFound": "The project uses Django {fromDjango}. {count} file(s) use APIs that django-upgrade rewrites.",
+      "whyItMatters": "Django removes deprecated APIs on a fixed schedule. Calls like force_text, ugettext and url() no longer exist in Django 4.0+, so imports fail and the app won't start.",
+      "whatWillHappen": "django-upgrade {flag} runs on every unlocked .py file. Every change is committed so you can review it.",
+      "ifApproved": "The code matches Django {django} and the tests run against it.",
+      "ifLocked": "Locked files keep the removed Django calls while the app runs on Django {django}. Importing them fails with ImportError, so the Test step fails.",
+      "manualSteps": [
+        "Rewrite each removed call listed below by hand (see the deprecation timeline).",
+        "Run the tests that import those modules."
+      ],
+      "effort": "~15 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-tests",
+      "riskIfApproved": "none",
+      "approvedEffect": "none",
+      "skipWhen": "primary-file",
+      "learnMore": [
+        {
+          "label": "django-upgrade",
+          "url": "https://github.com/adamchainz/django-upgrade"
+        },
+        {
+          "label": "Django deprecation timeline",
+          "url": "https://docs.djangoproject.com/en/dev/internals/deprecation/"
+        }
+      ]
+    },
+    "django-api.codemod": {
+      "plainTitle": "{api} was removed in Django {removedIn}",
+      "inPlainWords": "This line uses {api}, which Django {removedIn} removed. django-upgrade changes it to {replacement}.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "On Django {django} the name no longer exists, so importing this module fails and every view or test that touches it breaks.",
+      "whatWillHappen": "django-upgrade rewrites it to {replacement}.",
+      "ifApproved": "The line is rewritten and behaves the same on Django {django}.",
+      "ifLocked": "Locking keeps the whole file ({file}) unchanged, so the removed call stays. On Django {django} the import fails and the Test step fails.",
+      "manualSteps": [
+        "Replace {api} with {replacement}.",
+        "Run the tests for this module."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-tests",
+      "riskIfApproved": "none",
+      "approvedEffect": "none",
+      "learnMore": [
+        {
+          "label": "Django deprecation timeline",
+          "url": "https://docs.djangoproject.com/en/dev/internals/deprecation/"
+        },
+        {
+          "label": "django-upgrade",
+          "url": "https://github.com/adamchainz/django-upgrade"
+        }
+      ]
+    },
+    "rules.requirements": {
+      "plainTitle": "Raise dependency versions in {fileName} ({count} change(s))",
+      "inPlainWords": "The pinned versions of the framework and test tools are raised to releases that support Python {targetPython}.",
+      "whatWeFound": "{fileName} pins older releases: {details}.",
+      "whyItMatters": "Old pins often don't work on a new Python. For example, pytest 7.0 crashes on Python 3.14 (it uses ast.Str, which 3.14 removed) and Flask 2.0 lacks fixes for current Werkzeug. This is the upgrade itself.",
+      "whatWillHappen": "Each pin shown below is raised (exact pins stay exact). pip installs the new versions into a fresh venv before the tests run.",
+      "ifApproved": "The tests run against the new versions.",
+      "ifLocked": "{fileName} keeps the old pins, so pip installs the old releases on Python {targetPython}. They crash or fail to install, and the Test step fails.",
+      "manualSteps": [
+        "Raise the pins shown below by hand.",
+        "Create a venv on Python {targetPython}, pip install, and run the tests."
+      ],
+      "effort": "~10 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-tests",
+      "riskIfApproved": "none",
+      "approvedEffect": "none",
+      "learnMore": [
+        {
+          "label": "pip: requirements file format",
+          "url": "https://pip.pypa.io/en/stable/reference/requirements-file-format/"
+        },
+        {
+          "label": "Flask changelog (2.3 and 3.0 removals)",
+          "url": "https://flask.palletsprojects.com/en/stable/changes/"
+        },
+        {
+          "label": "pytest changelog",
+          "url": "https://docs.pytest.org/en/stable/changelog.html"
+        }
+      ]
+    },
+    "rules.pyproject": {
+      "plainTitle": "Declare Python {targetPython} in {fileName}",
+      "inPlainWords": "The project's packaging metadata says which Python it needs. It's raised to {targetPython}.",
+      "whatWeFound": "{fileName} still says: {details}.",
+      "whyItMatters": "requires-python (or python_requires) is what pip and your users read. If it still says an old version, the upgrade isn't recorded and the old Python can still be used.",
+      "whatWillHappen": "The version range is set to the target, as shown below.",
+      "ifApproved": "The metadata says Python {targetPython} and the checks confirm it.",
+      "ifLocked": "{fileName} keeps the old Python range. The code may run fine, but the Checks step sees the old declaration and fails the run.",
+      "manualSteps": [
+        "Set requires-python (or python_requires) to >={targetPython} by hand."
+      ],
+      "effort": "~2 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-checks",
+      "riskIfApproved": "none",
+      "approvedEffect": "none",
+      "learnMore": [
+        {
+          "label": "pyproject.toml: requires-python",
+          "url": "https://packaging.python.org/en/latest/specifications/pyproject-toml/"
+        },
+        {
+          "label": "Dropping support for older Python versions",
+          "url": "https://packaging.python.org/en/latest/guides/dropping-older-python-versions/"
+        }
+      ]
+    },
+    "rules.python-version": {
+      "plainTitle": "Set {fileName} to Python {targetPython}",
+      "inPlainWords": "The file that tells pyenv, uv or your host which Python to use is updated.",
+      "whatWeFound": "{fileName} asks for an older Python: {details}.",
+      "whyItMatters": "Developers' tools and some hosting platforms pick the interpreter from this file.",
+      "whatWillHappen": "The version in {fileName} is set to {targetPython} (runtime.txt gets the newest patch release).",
+      "ifApproved": "Everyone using the file switches to Python {targetPython}.",
+      "ifLocked": "The dry run isn't affected, but developers and the hosting platform keep using the old Python.",
+      "manualSteps": [
+        "Put {targetPython} in {fileName}."
+      ],
+      "effort": "~1 min",
+      "confidence": "high",
+      "riskIfSkipped": "low",
+      "skipEffect": "after-merge",
+      "riskIfApproved": "none",
+      "approvedEffect": "none",
+      "learnMore": [
+        {
+          "label": "What's new in Python 3.14",
+          "url": "https://docs.python.org/3/whatsnew/3.14.html"
+        }
+      ]
+    },
+    "rules.stdlib": {
+      "plainTitle": "Replace standard-library calls Python removed ({count} change(s) in {fileName})",
+      "inPlainWords": "Some old standard-library names were deleted in Python 3.12. The rules swap them for the official replacements.",
+      "whatWeFound": "{fileName} uses removed names: {details}.",
+      "whyItMatters": "Removed names fail the moment they run: assertEquals raises AttributeError, import imp raises ModuleNotFoundError, and SafeConfigParser no longer exists.",
+      "whatWillHappen": "Each line is rewritten exactly as shown below (assertEquals → assertEqual, SafeConfigParser → ConfigParser, readfp → read_file, imp.reload → importlib.reload).",
+      "ifApproved": "The code works on Python {targetPython}.",
+      "ifLocked": "{fileName} keeps the removed calls. On Python {targetPython} they raise AttributeError or ModuleNotFoundError, so the Test step fails.",
+      "manualSteps": [
+        "Apply the replacements shown below by hand.",
+        "Run the tests on Python {targetPython}."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-tests",
+      "riskIfApproved": "none",
+      "approvedEffect": "none",
+      "learnMore": [
+        {
+          "label": "What's new in Python 3.12 (removals)",
+          "url": "https://docs.python.org/3/whatsnew/3.12.html"
+        },
+        {
+          "label": "unittest: deprecated aliases",
+          "url": "https://docs.python.org/3/library/unittest.html"
+        }
+      ]
+    },
+    "rules.flask-imports": {
+      "plainTitle": "Import Markup and escape from markupsafe ({fileName})",
+      "inPlainWords": "Flask 3 no longer re-exports Markup and escape. They now come straight from markupsafe, which Flask already depends on.",
+      "whatWeFound": "{fileName}: {details}.",
+      "whyItMatters": "On Flask {flask} the line `from flask import Markup` raises ImportError, so the whole module (and the app) fails to load.",
+      "whatWillHappen": "The import is split: Markup and escape come from markupsafe, the other names stay on flask, as shown below.",
+      "ifApproved": "The module loads on Flask {flask}; HTML escaping behaves the same.",
+      "ifLocked": "{fileName} keeps `from flask import Markup/escape`. On Flask {flask} that's an ImportError, so the app can't start and the Test step fails.",
+      "manualSteps": [
+        "Change the import to `from markupsafe import Markup, escape`.",
+        "Run the tests."
+      ],
+      "effort": "~2 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-tests",
+      "riskIfApproved": "none",
+      "approvedEffect": "none",
+      "learnMore": [
+        {
+          "label": "Flask changelog (2.3 and 3.0 removals)",
+          "url": "https://flask.palletsprojects.com/en/stable/changes/"
+        }
+      ]
+    },
+    "rules.flask-json-config": {
+      "plainTitle": "Move JSON settings to app.json ({fileName})",
+      "inPlainWords": "Flask 2.3 removed the JSON_* config keys. The same settings now live on app.json.",
+      "whatWeFound": "{fileName}: {details}.",
+      "whyItMatters": "Setting a removed key doesn't raise an error. Flask silently ignores it, so responses change (for example, keys get sorted again) without any warning.",
+      "whatWillHappen": "The line is rewritten to set the matching app.json attribute, as shown below.",
+      "ifApproved": "JSON responses keep the behaviour the old setting asked for.",
+      "ifLocked": "The old config line stays and is silently ignored on Flask {flask}. Tests usually still pass, but API responses can change (key order, ASCII escaping, mimetype).",
+      "manualSteps": [
+        "Replace app.config[\"JSON_…\"] with the app.json attribute shown below.",
+        "Check one JSON response by hand."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "medium",
+      "skipEffect": "runtime",
+      "riskIfApproved": "none",
+      "approvedEffect": "none",
+      "learnMore": [
+        {
+          "label": "Flask changelog (2.3 and 3.0 removals)",
+          "url": "https://flask.palletsprojects.com/en/stable/changes/"
+        },
+        {
+          "label": "Flask API: DefaultJSONProvider",
+          "url": "https://flask.palletsprojects.com/en/stable/api/"
+        }
+      ]
+    },
+    "install.venv": {
+      "plainTitle": "Install the new versions into a fresh Python {python} venv",
+      "inPlainWords": "pip installs the upgraded packages into a throwaway virtual environment, so the tests run against them.",
+      "whatWeFound": "Dependencies come from {source}.",
+      "whyItMatters": "Without installing, the tests would still run old packages and prove nothing.",
+      "whatWillHappen": "A venv is created outside the project (in the run's own folder) and pip installs the dependencies. Nothing is installed into the project or into your system Python.",
+      "ifApproved": "Dependencies are installed with the new versions.",
+      "ifLocked": "This is project-wide and can't be locked. Marking it manual only adds a note to the report; the install still runs because the tests need it.",
+      "manualSteps": [
+        "After merging, recreate your own venv on Python {python} and reinstall."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "none",
+      "skipEffect": "none",
+      "riskIfApproved": "none",
+      "approvedEffect": "none",
+      "learnMore": [
+        {
+          "label": "venv: virtual environments",
+          "url": "https://docs.python.org/3/library/venv.html"
+        },
+        {
+          "label": "pip install",
+          "url": "https://pip.pypa.io/en/stable/cli/pip_install/"
+        }
+      ]
+    },
+    "install.none": {
+      "plainTitle": "No dependency list pip can install",
+      "inPlainWords": "The tool installs Python projects with pip, and this project has no file pip can read.",
+      "whatWeFound": "The project has no requirements*.txt, no [project] table in pyproject.toml and no setup.py.",
+      "whyItMatters": "Preflight refuses the run: there would be nothing to test against.",
+      "whatWillHappen": "Nothing; the run stops at Preflight.",
+      "ifApproved": "The run stops at Preflight.",
+      "ifLocked": "The run stops at Preflight.",
+      "manualSteps": [
+        "Export a requirements.txt (for example: pipenv requirements > requirements.txt), or add a [project] table to pyproject.toml.",
+        "Plan again."
+      ],
+      "effort": "~10 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-preflight",
+      "riskIfApproved": "blocker",
+      "approvedEffect": "fails-preflight",
+      "learnMore": [
+        {
+          "label": "pip: requirements file format",
+          "url": "https://pip.pypa.io/en/stable/reference/requirements-file-format/"
+        },
+        {
+          "label": "pyproject.toml: requires-python",
+          "url": "https://packaging.python.org/en/latest/specifications/pyproject-toml/"
+        }
+      ]
+    },
+    "python-module.removed": {
+      "plainTitle": "The {api} no longer exists in Python {removedIn}+",
+      "inPlainWords": "This line imports a standard-library module that Python deleted, so the import fails on Python {targetPython}.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "A missing module fails with ModuleNotFoundError as soon as the file is imported, which usually takes the whole app down with it.",
+      "whatWillHappen": "No rewrite tool replaces whole modules. If a test fails, the AI fix-up may port it to {replacement}.",
+      "ifApproved": "Tests that import this file fail; the AI fix-up gets a few tries.",
+      "ifLocked": "The AI fix-up can't touch the file, so the import stays and fails on Python {targetPython}. The Test step fails.",
+      "manualSteps": [
+        "Replace the module with {replacement}.",
+        "Run the code path that uses it."
+      ],
+      "effort": "~30 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-tests",
+      "riskIfApproved": "high",
+      "approvedEffect": "fails-tests",
+      "learnMore": [
+        {
+          "label": "PEP 594: removing dead batteries",
+          "url": "https://peps.python.org/pep-0594/"
+        },
+        {
+          "label": "PEP 632: deprecate distutils",
+          "url": "https://peps.python.org/pep-0632/"
+        },
+        {
+          "label": "What's new in Python 3.13 (removals)",
+          "url": "https://docs.python.org/3/whatsnew/3.13.html"
+        }
+      ]
+    },
+    "python-api.removed": {
+      "plainTitle": "{api} was removed in Python {removedIn}",
+      "inPlainWords": "This line calls a standard-library function or class that Python deleted.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "The call raises AttributeError or ImportError on Python {targetPython}, so the feature using it breaks.",
+      "whatWillHappen": "No rule rewrites this one safely. If a test fails, the AI fix-up may replace it with {replacement}.",
+      "ifApproved": "Tests that reach this line fail; the AI fix-up gets a few tries.",
+      "ifLocked": "The AI fix-up can't touch the file, so the call stays and fails on Python {targetPython}.",
+      "manualSteps": [
+        "Replace {api} with {replacement}.",
+        "Run the code path that uses it."
+      ],
+      "effort": "~15 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-tests",
+      "riskIfApproved": "high",
+      "approvedEffect": "fails-tests",
+      "learnMore": [
+        {
+          "label": "What's new in Python 3.12 (removals)",
+          "url": "https://docs.python.org/3/whatsnew/3.12.html"
+        },
+        {
+          "label": "What's new in Python 3.13 (removals)",
+          "url": "https://docs.python.org/3/whatsnew/3.13.html"
+        },
+        {
+          "label": "What's new in Python 3.14",
+          "url": "https://docs.python.org/3/whatsnew/3.14.html"
+        }
+      ]
+    },
+    "python-api.deprecated": {
+      "plainTitle": "{api} is deprecated",
+      "inPlainWords": "This still works on Python {targetPython} but prints a DeprecationWarning and will be removed in a later version.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "Nothing breaks today. It becomes an error in a future Python, and warnings in the test output hide real problems.",
+      "whatWillHappen": "Nothing is changed automatically. The report lists it as a follow-up.",
+      "ifApproved": "The run passes; the warning stays until someone replaces it.",
+      "ifLocked": "Same as approving: the call stays and keeps warning.",
+      "manualSteps": [
+        "Replace {api} with {replacement}.",
+        "Check the result is still the same (for utcnow, the new value is timezone-aware)."
+      ],
+      "effort": "~10 min",
+      "confidence": "high",
+      "riskIfSkipped": "low",
+      "skipEffect": "runtime",
+      "riskIfApproved": "low",
+      "approvedEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "What's new in Python 3.12 (removals)",
+          "url": "https://docs.python.org/3/whatsnew/3.12.html"
+        },
+        {
+          "label": "datetime: utcnow()",
+          "url": "https://docs.python.org/3/library/datetime.html"
+        }
+      ]
+    },
+    "flask-api.removed": {
+      "plainTitle": "{api} was removed in Flask {removedIn}",
+      "inPlainWords": "This line uses a Flask feature that no longer exists in Flask {flask}.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "On Flask {flask} the name is gone: the app fails to start (AttributeError / ImportError) or the setting is silently ignored.",
+      "whatWillHappen": "No rule rewrites this one safely (it needs a small redesign). If a test fails, the AI fix-up may port it to {replacement}.",
+      "ifApproved": "Tests that load this code fail; the AI fix-up gets a few tries.",
+      "ifLocked": "The AI fix-up can't touch the file, so the removed API stays and the app fails on Flask {flask}.",
+      "manualSteps": [
+        "Port it to {replacement}.",
+        "Run the tests and start the app once."
+      ],
+      "effort": "~30 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-tests",
+      "riskIfApproved": "high",
+      "approvedEffect": "fails-tests",
+      "learnMore": [
+        {
+          "label": "Flask changelog (2.3 and 3.0 removals)",
+          "url": "https://flask.palletsprojects.com/en/stable/changes/"
+        },
+        {
+          "label": "Flask: the application context",
+          "url": "https://flask.palletsprojects.com/en/stable/appcontext/"
+        }
+      ]
+    },
+    "flask-api.deprecated": {
+      "plainTitle": "{api} is deprecated in Flask {flask}",
+      "inPlainWords": "This still works on Flask {flask} but warns, and Flask plans to remove it.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "Nothing breaks today, but the next Flask release can remove it.",
+      "whatWillHappen": "Nothing is changed automatically. The report lists it as a follow-up.",
+      "ifApproved": "The run passes; the DeprecationWarning stays.",
+      "ifLocked": "Same as approving: the line stays and keeps warning.",
+      "manualSteps": [
+        "Use {replacement} instead."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "low",
+      "skipEffect": "runtime",
+      "riskIfApproved": "low",
+      "approvedEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "Flask changelog (2.3 and 3.0 removals)",
+          "url": "https://flask.palletsprojects.com/en/stable/changes/"
+        },
+        {
+          "label": "importlib.metadata.version()",
+          "url": "https://docs.python.org/3/library/importlib.metadata.html"
+        }
+      ]
+    },
+    "werkzeug-api.removed": {
+      "plainTitle": "{api} were removed in Werkzeug 3",
+      "inPlainWords": "Flask {flask} needs Werkzeug 3, which deleted these URL helpers.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "The import fails with ImportError as soon as the module loads.",
+      "whatWillHappen": "Nothing is rewritten automatically. If a test fails, the AI fix-up may switch to {replacement}.",
+      "ifApproved": "Tests that import this file fail; the AI fix-up gets a few tries.",
+      "ifLocked": "The AI fix-up can't touch the file, so the import stays and fails.",
+      "manualSteps": [
+        "Use {replacement} from the standard library instead.",
+        "Run the tests."
+      ],
+      "effort": "~15 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-tests",
+      "riskIfApproved": "high",
+      "approvedEffect": "fails-tests",
+      "learnMore": [
+        {
+          "label": "Werkzeug changelog",
+          "url": "https://werkzeug.palletsprojects.com/en/stable/changes/"
+        }
+      ]
+    },
+    "django-api.removed": {
+      "plainTitle": "{api} was removed in Django {removedIn}",
+      "inPlainWords": "This line uses a Django API that django-upgrade can't rewrite for you.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "On Django {django} the name is gone, so the module fails to import.",
+      "whatWillHappen": "Nothing is rewritten automatically. If a test fails, the AI fix-up may port it to {replacement}.",
+      "ifApproved": "Tests that import this file fail; the AI fix-up gets a few tries.",
+      "ifLocked": "The AI fix-up can't touch the file, so the removed API stays and the import fails.",
+      "manualSteps": [
+        "Port it to {replacement}.",
+        "Run the tests for this app."
+      ],
+      "effort": "~20 min",
+      "confidence": "high",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-tests",
+      "riskIfApproved": "high",
+      "approvedEffect": "fails-tests",
+      "learnMore": [
+        {
+          "label": "Django deprecation timeline",
+          "url": "https://docs.djangoproject.com/en/dev/internals/deprecation/"
+        },
+        {
+          "label": "Django: upgrading to a newer version",
+          "url": "https://docs.djangoproject.com/en/5.2/howto/upgrade-version/"
+        }
+      ]
+    },
+    "django.default-auto-field": {
+      "plainTitle": "Set DEFAULT_AUTO_FIELD before upgrading Django",
+      "inPlainWords": "Django wants you to say which column type automatic ids use. This project doesn't say yet.",
+      "whatWeFound": "{file} has INSTALLED_APPS but no DEFAULT_AUTO_FIELD.",
+      "whyItMatters": "Django warns about every model (models.W042). If someone later picks BigAutoField without care, makemigrations alters every primary key in the database.",
+      "whatWillHappen": "Nothing is changed automatically.",
+      "ifApproved": "The run passes with warnings; the setting is still missing.",
+      "ifLocked": "Same as approving: nothing changes, the warnings stay.",
+      "manualSteps": [
+        "Add DEFAULT_AUTO_FIELD = \"django.db.models.AutoField\" to keep today's id columns.",
+        "Run python manage.py makemigrations --check to confirm nothing changes."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "medium",
+      "skipEffect": "runtime",
+      "riskIfApproved": "medium",
+      "approvedEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "Django settings: DEFAULT_AUTO_FIELD",
+          "url": "https://docs.djangoproject.com/en/5.2/ref/settings/"
+        }
+      ]
+    },
+    "django.use-tz": {
+      "plainTitle": "USE_TZ turns on by default in Django 5.0",
+      "inPlainWords": "Django 5.0 changed a default: datetimes become timezone-aware unless the settings say otherwise.",
+      "whatWeFound": "{file} doesn't set USE_TZ, so it relies on the old default (False).",
+      "whyItMatters": "After the upgrade, stored and displayed times can shift and comparisons between naive and aware datetimes raise TypeError at runtime.",
+      "whatWillHappen": "Nothing is changed automatically.",
+      "ifApproved": "The run may pass while times behave differently in production.",
+      "ifLocked": "Same as approving: the default still changes.",
+      "manualSteps": [
+        "Add USE_TZ = False to keep today's behaviour, or plan the move to aware datetimes.",
+        "Check views and reports that show dates."
+      ],
+      "effort": "~30 min",
+      "confidence": "high",
+      "riskIfSkipped": "high",
+      "skipEffect": "runtime",
+      "riskIfApproved": "high",
+      "approvedEffect": "runtime",
+      "learnMore": [
+        {
+          "label": "Django 5.0 release notes",
+          "url": "https://docs.djangoproject.com/en/5.2/releases/5.0/"
+        },
+        {
+          "label": "Django: time zones",
+          "url": "https://docs.djangoproject.com/en/5.2/topics/i18n/timezones/"
+        }
+      ]
+    },
+    "dependency.pydantic-v1": {
+      "plainTitle": "pydantic {spec} is version 1",
+      "inPlainWords": "pydantic 2 changed how models work, and this route doesn't make that jump for you.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "pydantic 1.x has no builds for current Python lines, so pip install fails, and moving to v2 changes model code.",
+      "whatWillHappen": "Nothing is changed automatically.",
+      "ifApproved": "pip install will likely fail at the Test step.",
+      "ifLocked": "Same as approving: the old pin stays and pip install fails.",
+      "manualSteps": [
+        "Migrate to pydantic v2 first (the bump-pydantic tool helps).",
+        "Plan this migration again."
+      ],
+      "effort": "~2 h",
+      "confidence": "medium",
+      "riskIfSkipped": "blocker",
+      "skipEffect": "fails-install",
+      "riskIfApproved": "high",
+      "approvedEffect": "fails-install",
+      "learnMore": [
+        {
+          "label": "pydantic: migration guide",
+          "url": "https://docs.pydantic.dev/latest/migration/"
+        }
+      ]
+    },
+    "dependency.native-wheel": {
+      "plainTitle": "{name}{spec} needs a build for Python {python}",
+      "inPlainWords": "{name} contains compiled code. An old pin may have no ready-made download (wheel) for Python {python}.",
+      "whatWeFound": "{file} line {line}: {evidence}",
+      "whyItMatters": "Without a wheel, pip tries to compile it from source. That needs a C compiler and usually fails, especially on Windows.",
+      "whatWillHappen": "This pin is not bumped by the route.",
+      "ifApproved": "pip install may fail at the Test step; the AI fix-up may raise the pin.",
+      "ifLocked": "The pin stays as is, and so does the risk.",
+      "manualSteps": [
+        "Check PyPI for a {name} release with Python {python} wheels.",
+        "Raise the pin and run the tests."
+      ],
+      "effort": "~15 min",
+      "confidence": "medium",
+      "riskIfSkipped": "medium",
+      "skipEffect": "fails-install",
+      "riskIfApproved": "medium",
+      "approvedEffect": "fails-install",
+      "learnMore": [
+        {
+          "label": "pip install",
+          "url": "https://pip.pypa.io/en/stable/cli/pip_install/"
+        }
+      ]
+    },
+    "dependency.manual": {
+      "plainTitle": "A dependency the rules can't update",
+      "inPlainWords": "This dependency comes from a URL, a git repository or a local path, so the rules can't set its version.",
+      "whatWeFound": "{detail}",
+      "whyItMatters": "If that source has no release for the new Python or framework, pip install fails.",
+      "whatWillHappen": "The line is left exactly as it is.",
+      "ifApproved": "It's left alone; check it after the run.",
+      "ifLocked": "Same: it's left alone.",
+      "manualSteps": [
+        "Point it at a release that supports Python {targetPython}.",
+        "Run pip install and the tests."
+      ],
+      "effort": "~10 min",
+      "confidence": "medium",
+      "riskIfSkipped": "medium",
+      "skipEffect": "fails-install",
+      "riskIfApproved": "medium",
+      "approvedEffect": "fails-install",
+      "learnMore": [
+        {
+          "label": "pip: requirements file format",
+          "url": "https://pip.pypa.io/en/stable/reference/requirements-file-format/"
+        }
+      ]
+    },
+    "tests.pytest-undeclared": {
+      "plainTitle": "The tests need pytest, but it isn't listed",
+      "inPlainWords": "Some tests import pytest, but no dependency file mentions it, so the fresh venv won't have it.",
+      "whatWeFound": "Test files import pytest; no requirements file, extra or group declares it.",
+      "whyItMatters": "The test run fails with ModuleNotFoundError: No module named 'pytest' before any test runs.",
+      "whatWillHappen": "Nothing is changed automatically.",
+      "ifApproved": "The Test step will likely fail.",
+      "ifLocked": "Same as approving.",
+      "manualSteps": [
+        "Add pytest to requirements-dev.txt (or a test extra).",
+        "Plan again."
+      ],
+      "effort": "~2 min",
+      "confidence": "high",
+      "riskIfSkipped": "high",
+      "skipEffect": "fails-tests",
+      "riskIfApproved": "high",
+      "approvedEffect": "fails-tests",
+      "learnMore": [
+        {
+          "label": "pytest: running unittest tests",
+          "url": "https://docs.pytest.org/en/stable/how-to/unittest.html"
+        }
+      ]
+    },
+    "package-manager.python": {
+      "plainTitle": "{lockfile} isn't updated by the run",
+      "inPlainWords": "This project uses {manager}. The run installs with pip, so the {manager} lockfile keeps the old versions.",
+      "whatWeFound": "The project has {lockfile}.",
+      "whyItMatters": "Teammates and CI that install from the lockfile keep getting the old versions until it's regenerated.",
+      "whatWillHappen": "The run edits the dependency declarations and tests with pip. {lockfile} is left alone.",
+      "ifApproved": "The run proceeds; re-lock after merging.",
+      "ifLocked": "Same: the lockfile is never edited.",
+      "manualSteps": [
+        "Re-lock with {manager} after the migration.",
+        "Commit the new lockfile in the same pull request."
+      ],
+      "effort": "~5 min",
+      "confidence": "high",
+      "riskIfSkipped": "medium",
+      "skipEffect": "after-merge",
+      "riskIfApproved": "medium",
+      "approvedEffect": "after-merge",
+      "learnMore": [
+        {
+          "label": "pip install",
+          "url": "https://pip.pypa.io/en/stable/cli/pip_install/"
+        }
+      ]
+    }
+  }
+}

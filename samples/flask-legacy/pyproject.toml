@@ -1,0 +1,8 @@
+[project]
+name = "shortlink"
+version = "2.3.0"
+description = "Small URL-shortener API on an old Flask, used as a pre-migration sample."
+requires-python = ">=3.8"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

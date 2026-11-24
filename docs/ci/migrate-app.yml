@@ -1,0 +1,88 @@
+# Template for an application repository: copy to .github/workflows/leapfrog.yml.
+# Runs Verdigrade on demand, pushes a migrate/* branch and opens a PR with the report.
+name: leapfrog
+
+on:
+  workflow_dispatch:
+    inputs:
+      to_java:
+        description: Target Java
+        default: "21"
+      to_boot:
+        description: Target Spring Boot line (e.g. 4.0.x, 3.5.x, none)
+        default: "4.0.x"
+      dry_run:
+        description: Dry run only (report and diff as artifacts, no PR)
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: app
+          fetch-depth: 0
+
+      # Pin to a tag or commit of your fork of Verdigrade (older setups: the JAVA_MIGRATOR_* env names below still work).
+      - uses: actions/checkout@v4
+        with:
+          repository: your-org/leapfrog
+          ref: main
+          path: leapfrog
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.to_java }}
+          cache: maven
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Verdigrade
+        working-directory: leapfrog/agent
+        run: npm ci || npm install
+
+      - name: Migrate
+        working-directory: leapfrog/agent
+        run: |
+          git -C "$GITHUB_WORKSPACE/app" config user.name "leapfrog"
+          git -C "$GITHUB_WORKSPACE/app" config user.email "leapfrog@users.noreply.github.com"
+          npx leapfrog migrate "$GITHUB_WORKSPACE/app" \
+            --to-java "${{ inputs.to_java }}" --to-boot "${{ inputs.to_boot }}" \
+            ${{ inputs.dry_run && '--dry-run' || '' }} \
+            --out "$GITHUB_WORKSPACE/migration" > "$GITHUB_WORKSPACE/migration-report.md"
+        env:
+          # No model calls in CI unless you configure credentials for the agent.
+          VERDIGRADE_FIX_ROUNDS: "0"
+          VERDIGRADE_NARRATIVE: "0"
+          # Unattended CI has no human review step. Commit an approved migration-plan.json to the app
+          # repository instead (and remove this line) to keep its locks and manual items.
+          VERDIGRADE_REQUIRE_PLAN: "false"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: leapfrog-report
+          path: |
+            migration/
+            migration-report.md
+
+      - name: Open pull request
+        if: ${{ !inputs.dry_run }}
+        working-directory: app
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="$(git rev-parse --abbrev-ref HEAD)"
+          git push --set-upstream origin "$branch"
+          gh pr create --head "$branch" --title "Migrate to Java ${{ inputs.to_java }} / Spring Boot ${{ inputs.to_boot }}" \
+            --body-file "$GITHUB_WORKSPACE/migration-report.md"

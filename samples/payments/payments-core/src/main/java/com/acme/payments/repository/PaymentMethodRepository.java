@@ -1,0 +1,9 @@
+package com.acme.payments.repository;
+
+import com.acme.payments.entity.PaymentMethod;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Long> {
+
+  boolean existsByTokenIgnoreCase(String token);
+}

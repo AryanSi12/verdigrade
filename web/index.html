@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f9f9f8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="description" content="Verdigrade: local, plan-first upgrades for Java, Node and Python apps, with OpenRewrite, codemods and tests as the judge." />
+    <meta name="application-name" content="Verdigrade" />
+    <title>Verdigrade</title>
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem("leapfrog-theme-v2");
+          var dark = saved === "dark"; // light by default; the toggle remembers a choice
+          document.documentElement.classList.toggle("dark", dark);
+          document.documentElement.dataset.theme = dark ? "dark" : "light";
+          document.documentElement.style.colorScheme = dark ? "dark" : "light";
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
